@@ -105,7 +105,7 @@ public static class HarmonyPatches
 
             File.WriteAllText("C:\\Games\\Orcs Civil War\\TEST.txt", TrainerComponent.GetGameObjects());
 
-            isFiring = false;
+            isFiring = false; // We don't use this anymore, I changed to Event.current.use();
         }
     }
 }
