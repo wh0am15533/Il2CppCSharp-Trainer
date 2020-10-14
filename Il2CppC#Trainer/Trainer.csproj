@@ -128,17 +128,25 @@
       <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\UnityEngine.UIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DoorstopLoader.cs" />
     <Compile Include="BepInExLoader.cs" />
-    <Compile Include="Menu.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TrainerComponent.cs" />
+    <Compile Include="WindowDragHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
