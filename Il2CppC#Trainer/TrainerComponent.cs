@@ -18,20 +18,29 @@ using UnityEngine.SceneManagement;
 
 namespace Trainer
 {
+    #region[Delegates]
+
 #if DEBUG
     internal delegate void getRootSceneObjects(int handle, IntPtr list);
 #endif
+
+    #endregion
 
     public class TrainerComponent : MonoBehaviour
     {
         #region[Declarations]
 
+        #region[Trainer]
+
         public static TrainerComponent instance;
 
+#if DEBUG
         private static GameObject canvas = null;
         private static bool isVisible = false;
-
         private static GameObject uiPanel = null;
+#endif
+
+        #endregion
 
         #region[For Orc's]
 
@@ -74,143 +83,6 @@ namespace Trainer
         public static void Update()
         {
 #if DEBUG
-            // Test Creating UI Elements
-            if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.F5) && Event.current.type == EventType.KeyDown)
-            {
-                if (canvas == null)
-                {
-                    BepInExLoader.log.LogMessage("[Trainer] TestComponent: Test Creating UI Elements");
-
-                    // Create a GameObject with a Canvas
-                    canvas = instance.createUICanvas();
-                    Object.DontDestroyOnLoad(canvas);
-
-                    // Add a Panel to the Canvas. See createUIPanel for why we pass height/width as string
-                    uiPanel = instance.createUIPanel(canvas, "550", "200", null);
-
-                    // This is how we'll hook mouse Events for window dragging
-                    uiPanel.AddComponent<EventTrigger>();
-                    uiPanel.AddComponent<WindowDragHandler>();
-
-                    Image panelImage = uiPanel.GetComponent<Image>();
-                    panelImage.color = instance.HTMLString2Color("#2D2D30").Unbox<Color>();
-
-                    #region[Panel Elements]
-
-                    // NOTE: Elements are spaced in increments/decrements of 35 in localPosition 
-
-                    #region[Add a Button]
-
-                    Sprite btnSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900"));
-                    GameObject uiButton = instance.createUIButton(uiPanel, btnSprite);
-                    uiButton.GetComponent<RectTransform>().localPosition = new Vector3(0, 250, 0);
-
-                    #endregion
-
-                    #region[Add a Toggle]
-
-                    Sprite toggleBgSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#3E3E42"));
-                    Sprite toggleSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900"));
-                    GameObject uiToggle = instance.createUIToggle(uiPanel, toggleBgSprite, toggleSprite);
-                    uiToggle.GetComponentInChildren<Text>().color = Color.white;
-                    uiToggle.GetComponentInChildren<Toggle>().isOn = false;
-                    uiToggle.GetComponent<RectTransform>().localPosition = new Vector3(0, 215, 0);
-                
-                    #endregion
-
-                    #region[Add a Slider]
-
-                    Sprite sliderBgSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#9E9E9E"));
-                    Sprite sliderFillSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900"));
-                    Sprite sliderKnobSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#191919"));
-                    GameObject uiSlider = instance.createUISlider(uiPanel, sliderBgSprite, sliderFillSprite, sliderKnobSprite);
-                    uiSlider.GetComponentInChildren<Slider>().value = 0.5f;
-                    uiSlider.GetComponent<RectTransform>().localPosition = new Vector3(0, 185, 0);
-
-                    #endregion
-
-                    #region[Add a Text (Label)]
-
-                    Sprite txtBgSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900"));
-                    GameObject uiText = instance.createUIText(uiPanel, txtBgSprite, "#FFFFFF");
-                    uiText.GetComponent<Text>().text = "This is a new Text Label";
-                    uiText.GetComponent<RectTransform>().localPosition = new Vector3(0, 150, 0);
-
-                    #endregion
-
-                    #region[Add a InputField]
-                
-                    Sprite inputFieldSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900"));
-                    GameObject uiInputField = instance.createUIInputField(uiPanel, inputFieldSprite, "#000000");
-                    #region[Dev Note]
-                    // The following line is odd. It sets the text but doesn't display it, WTF? The default child object PlaceHolder 
-                    // has Text component but Unhollower thinks it's a UnityEngine.Graphic?
-                    //      uiInputField.transform.GetChild(0).gameObject.GetComponent<Text>().text = "Search...";
-                    // Checked in Unity Editor too, it's definately Text, why does unhollower think it's Graphic?
-                    // 
-                    // We'll just use the InputField component directly. It works, but PlaceHolder is nice...
-                    #endregion
-                    uiInputField.GetComponent<InputField>().text = "Some Input Field...";
-                    uiInputField.GetComponent<RectTransform>().localPosition = new Vector3(0, 115, 0);
-
-                    #endregion
-
-                    #region[Add a DropDown]
-
-                    // NOTE: This wierd, it does it's thing and work's but then the rest on the UI disappears... hmmm... :/
-
-                    Sprite dropdownBgSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900"));
-                    Sprite dropdownScrollbarSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#3E3E42"));
-                    Sprite dropdownDropDownSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#252526"));
-                    Sprite dropdownCheckmarkSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900"));
-                    Sprite dropdownMaskSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#1E1E1E"));
-                    GameObject uiDropDown = instance.createUIDropDown(uiPanel, dropdownBgSprite, dropdownScrollbarSprite, dropdownDropDownSprite, dropdownCheckmarkSprite, dropdownMaskSprite);
-                    Object.DontDestroyOnLoad(uiDropDown);
-                    uiDropDown.GetComponent<RectTransform>().localPosition = new Vector3(0, 75, 0);
-
-                    #endregion
-
-                    #region[Add a ScrollView]
-
-                    Sprite scrollviewBgSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#9E9E9E"));
-                    Sprite scrollviewScrollbarSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#3E3E42"));
-                    Sprite scrollviewMaskSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#3E3E42"));
-                    GameObject uiScrollView = instance.createUIScrollView(uiPanel, scrollviewBgSprite, scrollviewMaskSprite, scrollviewScrollbarSprite);
-
-                    // Set some content
-                    GameObject content = uiScrollView.GetComponent<ScrollRect>().content.gameObject;
-                    GameObject contentTextObj = instance.createUIText(content, scrollviewBgSprite, "#FFFFFF");
-                    contentTextObj.GetComponent<Text>().text = "ScrollView Element";
-                    contentTextObj.GetComponent<RectTransform>().localPosition = new Vector3(120, -50, 0);
-
-                    uiScrollView.GetComponent<RectTransform>().localPosition = new Vector3(0, -75, 0);
-
-                    #endregion
-
-
-                    #endregion
-
-                    isVisible = true;
-
-                    BepInExLoader.log.LogMessage("[Trainer] TestComponent: Complete!");
-                }
-                else
-                {
-                    if (isVisible)
-                    {
-                        canvas.SetActive(false);
-                        isVisible = false;
-                    }
-                    else
-                    {
-                        canvas.SetActive(true);
-                        isVisible = true;
-                    }
-                }
-
-                Event.current.Use();
-            }
-
             // Dump Root GameObjects - Down to Great GrandChildren
             if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.Backspace) && Event.current.type == EventType.KeyDown)
             {
@@ -326,6 +198,143 @@ namespace Trainer
                 DumpAll(GetRootSceneGameObjects());
                 Event.current.Use();
             }
+
+            // Test Creating UI Elements
+            if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.F5) && Event.current.type == EventType.KeyDown)
+            {
+                if (canvas == null)
+                {
+                    BepInExLoader.log.LogMessage("Test Creating UI Elements");
+
+                    // Create a GameObject with a Canvas
+                    canvas = instance.createUICanvas();
+                    Object.DontDestroyOnLoad(canvas);
+
+                    // Add a Panel to the Canvas. See createUIPanel for why we pass height/width as string
+                    uiPanel = instance.createUIPanel(canvas, "550", "200", null);
+
+                    // This is how we'll hook mouse Events for window dragging
+                    uiPanel.AddComponent<EventTrigger>();
+                    uiPanel.AddComponent<WindowDragHandler>();
+
+                    Image panelImage = uiPanel.GetComponent<Image>();
+                    panelImage.color = instance.HTMLString2Color("#2D2D30FF").Unbox<Color32>();
+
+                    #region[Panel Elements]
+
+                    // NOTE: Elements are spaced in increments/decrements of 35 in localPosition 
+
+                    #region[Add a Button]
+
+                    Sprite btnSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900FF"));
+                    GameObject uiButton = instance.createUIButton(uiPanel, btnSprite);
+                    uiButton.GetComponent<RectTransform>().localPosition = new Vector3(0, 250, 0);
+
+                    #endregion
+
+                    #region[Add a Toggle]
+
+                    Sprite toggleBgSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#3E3E42FF"));
+                    Sprite toggleSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900FF"));
+                    GameObject uiToggle = instance.createUIToggle(uiPanel, toggleBgSprite, toggleSprite);
+                    uiToggle.GetComponentInChildren<Text>().color = Color.white;
+                    uiToggle.GetComponentInChildren<Toggle>().isOn = false;
+                    uiToggle.GetComponent<RectTransform>().localPosition = new Vector3(0, 215, 0);
+
+                    #endregion
+
+                    #region[Add a Slider]
+
+                    Sprite sliderBgSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#9E9E9EFF"));
+                    Sprite sliderFillSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900FF"));
+                    Sprite sliderKnobSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#191919FF"));
+                    GameObject uiSlider = instance.createUISlider(uiPanel, sliderBgSprite, sliderFillSprite, sliderKnobSprite);
+                    uiSlider.GetComponentInChildren<Slider>().value = 0.5f;
+                    uiSlider.GetComponent<RectTransform>().localPosition = new Vector3(0, 185, 0);
+
+                    #endregion
+
+                    #region[Add a Text (Label)]
+
+                    Sprite txtBgSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900FF"));
+                    GameObject uiText = instance.createUIText(uiPanel, txtBgSprite, "#FFFFFFFF");
+                    uiText.GetComponent<Text>().text = "This is a new Text Label";
+                    uiText.GetComponent<RectTransform>().localPosition = new Vector3(0, 150, 0);
+
+                    #endregion
+
+                    #region[Add a InputField]
+
+                    Sprite inputFieldSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900FF"));
+                    GameObject uiInputField = instance.createUIInputField(uiPanel, inputFieldSprite, "#000000FF");
+                    #region[Dev Note]
+                    // The following line is odd. It sets the text but doesn't display it, WTF? The default child object PlaceHolder 
+                    // has Text component but Unhollower thinks it's a UnityEngine.Graphic?
+                    //      uiInputField.transform.GetChild(0).gameObject.GetComponent<Text>().text = "Search...";
+                    // Checked in Unity Editor too, it's definately Text, why does unhollower think it's Graphic?
+                    // 
+                    // We'll just use the InputField component directly. It works, but PlaceHolder is nice...
+                    #endregion
+                    uiInputField.GetComponent<InputField>().text = "Some Input Field...";
+                    uiInputField.GetComponent<RectTransform>().localPosition = new Vector3(0, 115, 0);
+
+                    #endregion
+
+                    #region[Add a DropDown]
+
+                    // NOTE: This wierd, it does it's thing and work's but then the rest on the UI disappears... hmmm... :/
+                    /*
+                    Sprite dropdownBgSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900FF"));
+                    Sprite dropdownScrollbarSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#3E3E42FF"));
+                    Sprite dropdownDropDownSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#252526FF"));
+                    Sprite dropdownCheckmarkSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900FF"));
+                    Sprite dropdownMaskSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#1E1E1EFF"));
+                    GameObject uiDropDown = instance.createUIDropDown(uiPanel, dropdownBgSprite, dropdownScrollbarSprite, dropdownDropDownSprite, dropdownCheckmarkSprite, dropdownMaskSprite);
+                    Object.DontDestroyOnLoad(uiDropDown);
+                    uiDropDown.GetComponent<RectTransform>().localPosition = new Vector3(0, 75, 0);
+                    */
+                    #endregion
+
+                    #region[Add a ScrollView]
+
+                    Sprite scrollviewBgSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#9E9E9EFF"));
+                    Sprite scrollviewScrollbarSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#3E3E42FF"));
+                    Sprite scrollviewMaskSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#3E3E42FF"));
+                    GameObject uiScrollView = instance.createUIScrollView(uiPanel, scrollviewBgSprite, scrollviewMaskSprite, scrollviewScrollbarSprite);
+
+                    // Set some content
+                    GameObject content = uiScrollView.GetComponent<ScrollRect>().content.gameObject;
+                    GameObject contentTextObj = instance.createUIText(content, scrollviewBgSprite, "#FFFFFFFF");
+                    contentTextObj.GetComponent<Text>().text = "ScrollView Element";
+                    contentTextObj.GetComponent<RectTransform>().localPosition = new Vector3(120, -50, 0);
+
+                    uiScrollView.GetComponent<RectTransform>().localPosition = new Vector3(0, -75, 0);
+
+                    #endregion
+
+                    #endregion
+
+                    isVisible = true;
+
+                    BepInExLoader.log.LogMessage("Complete!");
+                }
+                else
+                {
+                    if (isVisible)
+                    {
+                        canvas.SetActive(false);
+                        isVisible = false;
+                    }
+                    else
+                    {
+                        canvas.SetActive(true);
+                        isVisible = true;
+                    }
+                }
+
+                Event.current.Use();
+            }
+
 #endif
 
             #region[Orc's Cheats]
@@ -412,27 +421,49 @@ namespace Trainer
 
 
         #region[UI Helpers]
-
-        public Il2CppSystem.Object HTMLString2Color(Il2CppSystem.String htmlcolorstring)
+#if DEBUG
+        public Il2CppSystem.Object HTMLString2Color(string htmlcolorstring)
         {
+            Color32 color = new Color32();
+
+            #region[DevNote]
             // Unity ref: https://docs.unity3d.com/ScriptReference/ColorUtility.TryParseHtmlString.html
-            // Note Color strings can also set alpha: "#7AB900" vs. w/alpha "#7AB90003" 
-            Color color = new Color();
-            ColorUtility.TryParseHtmlString(htmlcolorstring, out color);
+            // Note: Color strings can also set alpha: "#7AB900" vs. w/alpha "#7AB90003" 
+            //ColorUtility.TryParseHtmlString(htmlcolorstring, out color); // Unity's Method, This may have been stripped
+            #endregion
+
+            color = htmlcolorstring.HexToColor().Unbox<Color32>();
+            //BepInExLoader.log.LogMessage("HexString: " + htmlcolorstring  + "RGBA(" + color.r.ToString() + "," + color.g.ToString() + "," + color.b.ToString() + "," + color.a.ToString() + ")");
 
             return color.BoxIl2CppObject();
         }
 
         public Texture2D createDefaultTexture(Il2CppSystem.String htmlcolorstring)
         {
-            Color color = HTMLString2Color(htmlcolorstring).Unbox<Color>();
-            
+            Color32 color = HTMLString2Color(htmlcolorstring).Unbox<Color32>();
+
             // Make a new sprite from a texture
             Texture2D SpriteTexture = new Texture2D(1, 1);
             SpriteTexture.SetPixel(0, 0, color);
             SpriteTexture.Apply();
 
             return SpriteTexture;
+        }
+
+        public Texture2D createTextureFromFile(Il2CppSystem.String FilePath)
+        {
+            // Load a PNG or JPG file from disk to a Texture2D
+            Texture2D Tex2D;
+            Il2CppStructArray<byte> FileData;
+
+            if (File.Exists(FilePath))
+            {
+                FileData = File.ReadAllBytes(FilePath);
+                Tex2D = new Texture2D(265, 198);
+                //Tex2D.LoadRawTextureData(FileData); // This is Broke. Unhollower/Texture2D doesn't like it...
+                Tex2D.Apply();
+            }
+            return null;
         }
 
         public Sprite createSpriteFrmTexture(Texture2D SpriteTexture)
@@ -443,25 +474,9 @@ namespace Trainer
             return NewSprite;
         }
 
-        public Texture2D createTextureFromFile(Il2CppSystem.String FilePath)
-        {
-            // Load a PNG or JPG file from disk to a Texture2D
-            Texture2D Tex2D;
-            Il2CppStructArray<byte> FileData;            
-
-            if (File.Exists(FilePath))
-            {
-                FileData = File.ReadAllBytes(FilePath);
-                Tex2D = new Texture2D(265, 198);
-                Tex2D.LoadRawTextureData(FileData); // This is Broke. Unhollower/Texture2D doesn't like it...
-                Tex2D.Apply();
-            }
-            return null;
-        }
-
         public GameObject createUICanvas()
         {
-            BepInExLoader.log.LogMessage("[Trainer] TestComponent: Creating Canvas");
+            BepInExLoader.log.LogMessage("Creating Canvas");
 
             // Create a new Canvas Object with required components
             GameObject CanvasGO = new GameObject("CanvasGO");
@@ -480,20 +495,20 @@ namespace Trainer
 
         public GameObject createUIPanel(GameObject canvas, Il2CppSystem.String height, Il2CppSystem.String width, Sprite BgSprite = null)
         {
-            DefaultControls.Resources uiResources = new DefaultControls.Resources();
+            UIControls.Resources uiResources = new UIControls.Resources();
 
             uiResources.background = BgSprite;
 
-            BepInExLoader.log.LogMessage("[Trainer] TestComponent: Creating UI Panel");
-            GameObject uiPanel = DefaultControls.CreatePanel(uiResources);
+            BepInExLoader.log.LogMessage("Creating UI Panel");
+            GameObject uiPanel = UIControls.CreatePanel(uiResources);
             uiPanel.transform.SetParent(canvas.transform, false);
 
             RectTransform rectTransform = uiPanel.GetComponent<RectTransform>();
 
             float size;
-            Il2CppSystem.Single.TryParse(height, out size); // Their is no float support in Unhollower, this avoids errors
+            size = Il2CppSystem.Single.Parse(height); // Their is no float support in Unhollower, this avoids errors
             rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, size);
-            Il2CppSystem.Single.TryParse(width, out size);
+            size = Il2CppSystem.Single.Parse(width);
             rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, size);
             // You can also use rectTransform.sizeDelta = new Vector2(width, height);
 
@@ -502,12 +517,12 @@ namespace Trainer
 
         public GameObject createUIButton(GameObject parent, Sprite NewSprite)
         {
-            DefaultControls.Resources uiResources = new DefaultControls.Resources();
+            UIControls.Resources uiResources = new UIControls.Resources();
 
             uiResources.standard = NewSprite;
 
-            BepInExLoader.log.LogMessage("[Trainer] TestComponent: Creating UI Button");
-            GameObject uiButton = DefaultControls.CreateButton(uiResources);
+            BepInExLoader.log.LogMessage("Creating UI Button");
+            GameObject uiButton = UIControls.CreateButton(uiResources);
             uiButton.transform.SetParent(parent.transform, false);
 
             return uiButton;
@@ -515,13 +530,13 @@ namespace Trainer
 
         public GameObject createUIToggle(GameObject parent, Sprite BgSprite, Sprite customCheckmarkSprite)
         {
-            DefaultControls.Resources uiResources = new DefaultControls.Resources();
+            UIControls.Resources uiResources = new UIControls.Resources();
 
             uiResources.standard = BgSprite;
             uiResources.checkmark = customCheckmarkSprite;
 
-            BepInExLoader.log.LogMessage("[Trainer] TestComponent: Creating UI Toggle");
-            GameObject uiToggle = DefaultControls.CreateToggle(uiResources);
+            BepInExLoader.log.LogMessage("Creating UI Toggle");
+            GameObject uiToggle = UIControls.CreateToggle(uiResources);
             uiToggle.transform.SetParent(parent.transform, false);
 
             return uiToggle;
@@ -529,14 +544,14 @@ namespace Trainer
 
         public GameObject createUISlider(GameObject parent, Sprite BgSprite, Sprite FillSprite, Sprite KnobSprite)
         {
-            DefaultControls.Resources uiResources = new DefaultControls.Resources();
+            UIControls.Resources uiResources = new UIControls.Resources();
 
             uiResources.background = BgSprite;
             uiResources.standard = FillSprite;
             uiResources.knob = KnobSprite;
 
-            BepInExLoader.log.LogMessage("[Trainer] TestComponent: Creating UI Slider");
-            GameObject uiSlider = DefaultControls.CreateSlider(uiResources);
+            BepInExLoader.log.LogMessage("Creating UI Slider");
+            GameObject uiSlider = UIControls.CreateSlider(uiResources);
             uiSlider.transform.SetParent(parent.transform, false);
 
             return uiSlider;
@@ -544,18 +559,18 @@ namespace Trainer
 
         public GameObject createUIInputField(GameObject parent, Sprite BgSprite, Il2CppSystem.String textColor)
         {
-            DefaultControls.Resources uiResources = new DefaultControls.Resources();
+            UIControls.Resources uiResources = new UIControls.Resources();
 
             uiResources.inputField = BgSprite;
 
-            BepInExLoader.log.LogMessage("[Trainer] TestComponent: Creating UI InputField");
-            GameObject uiInputField = DefaultControls.CreateInputField(uiResources);
+            BepInExLoader.log.LogMessage("Creating UI InputField");
+            GameObject uiInputField = UIControls.CreateInputField(uiResources);
             uiInputField.transform.SetParent(parent.transform, false);
 
             var textComps = uiInputField.GetComponentsInChildren<Text>();
-            foreach(var text in textComps)
+            foreach (var text in textComps)
             {
-                text.color = HTMLString2Color(textColor).Unbox<Color>();
+                text.color = HTMLString2Color(textColor).Unbox<Color32>();
             }
 
             return uiInputField;
@@ -563,7 +578,7 @@ namespace Trainer
 
         public GameObject createUIDropDown(GameObject parent, Sprite BgSprite, Sprite ScrollbarSprite, Sprite DropDownSprite, Sprite CheckmarkSprite, Sprite customMaskSprite)
         {
-            DefaultControls.Resources uiResources = new DefaultControls.Resources();
+            UIControls.Resources uiResources = new UIControls.Resources();
 
             // Set the Background and Handle Image
             uiResources.standard = BgSprite;
@@ -576,8 +591,8 @@ namespace Trainer
             // Set the Viewport Mask
             uiResources.mask = customMaskSprite;
 
-            BepInExLoader.log.LogMessage("[Trainer] TestComponent: Creating UI DropDown");
-            GameObject uiDropdown = DefaultControls.CreateDropdown(uiResources);
+            BepInExLoader.log.LogMessage("Creating UI DropDown");
+            var uiDropdown = UIControls.CreateDropdown(uiResources);
             uiDropdown.transform.SetParent(parent.transform, false);
 
             return uiDropdown;
@@ -585,12 +600,12 @@ namespace Trainer
 
         public GameObject createUIImage(GameObject parent, Sprite BgSprite)
         {
-            DefaultControls.Resources uiResources = new DefaultControls.Resources();
+            UIControls.Resources uiResources = new UIControls.Resources();
 
             uiResources.background = BgSprite;
-            
-            BepInExLoader.log.LogMessage("[Trainer] TestComponent: Creating UI Image");
-            GameObject uiImage = DefaultControls.CreateImage(uiResources);
+
+            BepInExLoader.log.LogMessage("Creating UI Image");
+            GameObject uiImage = UIControls.CreateImage(uiResources);
             uiImage.transform.SetParent(parent.transform, false);
 
             return uiImage;
@@ -598,12 +613,12 @@ namespace Trainer
 
         public GameObject createUIRawImage(GameObject parent, Sprite BgSprite)
         {
-            DefaultControls.Resources uiResources = new DefaultControls.Resources();
+            UIControls.Resources uiResources = new UIControls.Resources();
 
             uiResources.background = BgSprite;
 
-            BepInExLoader.log.LogMessage("[Trainer] TestComponent: Creating UI RawImage");
-            GameObject uiRawImage = DefaultControls.CreateRawImage(uiResources);
+            BepInExLoader.log.LogMessage("Creating UI RawImage");
+            GameObject uiRawImage = UIControls.CreateRawImage(uiResources);
             uiRawImage.transform.SetParent(parent.transform, false);
 
             return uiRawImage;
@@ -611,12 +626,12 @@ namespace Trainer
 
         public GameObject createUIScrollbar(GameObject parent, Sprite ScrollbarSprite)
         {
-            DefaultControls.Resources uiResources = new DefaultControls.Resources();
+            UIControls.Resources uiResources = new UIControls.Resources();
 
             uiResources.background = ScrollbarSprite;
 
-            BepInExLoader.log.LogMessage("[Trainer] TestComponent: Creating UI Scrollbar");
-            GameObject uiScrollbar = DefaultControls.CreateScrollbar(uiResources);
+            BepInExLoader.log.LogMessage("Creating UI Scrollbar");
+            GameObject uiScrollbar = UIControls.CreateScrollbar(uiResources);
             uiScrollbar.transform.SetParent(parent.transform, false);
 
             return uiScrollbar;
@@ -624,7 +639,7 @@ namespace Trainer
 
         public GameObject createUIScrollView(GameObject parent, Sprite BgSprite, Sprite customMaskSprite, Sprite customScrollbarSprite)
         {
-            DefaultControls.Resources uiResources = new DefaultControls.Resources();
+            UIControls.Resources uiResources = new UIControls.Resources();
 
             // These 2 all need to be the same for some reason, I think due to scrollview automation.
             uiResources.background = BgSprite;
@@ -633,8 +648,8 @@ namespace Trainer
             uiResources.standard = customScrollbarSprite;
             uiResources.mask = customMaskSprite;
 
-            BepInExLoader.log.LogMessage("[Trainer] TestComponent: Creating UI ScrollView");
-            GameObject uiScrollView = DefaultControls.CreateScrollView(uiResources);
+            BepInExLoader.log.LogMessage("Creating UI ScrollView");
+            GameObject uiScrollView = UIControls.CreateScrollView(uiResources);
             uiScrollView.transform.SetParent(parent.transform, false);
 
             return uiScrollView;
@@ -642,21 +657,21 @@ namespace Trainer
 
         public GameObject createUIText(GameObject parent, Sprite BgSprite, Il2CppSystem.String textColor)
         {
-            DefaultControls.Resources uiResources = new DefaultControls.Resources();
+            UIControls.Resources uiResources = new UIControls.Resources();
 
             uiResources.background = BgSprite;
 
-            BepInExLoader.log.LogMessage("[Trainer] TestComponent: Creating UI Text");
-            GameObject uiText = DefaultControls.CreateText(uiResources);
+            BepInExLoader.log.LogMessage("Creating UI Text");
+            GameObject uiText = UIControls.CreateText(uiResources);
             uiText.transform.SetParent(parent.transform, false);
 
             Text text = uiText.GetComponent<Text>();
             //uiText.transform.GetChild(0).GetComponent<Text>().font = (Font)Resources.GetBuiltinResource(Font.Il2CppType, "Arial.ttf"); // Invalid Cast
-            text.color = HTMLString2Color(textColor).Unbox<Color>();
+            text.color = HTMLString2Color(textColor).Unbox<Color32>();
 
             return uiText;
         }
-
+#endif
         #endregion
 
         #region[Unity GetRootGameObjects]

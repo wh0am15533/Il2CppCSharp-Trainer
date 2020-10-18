@@ -30,13 +30,14 @@ namespace Trainer
         {
             #region[Register TrainerComponent in Il2Cpp]
 
-            log.LogMessage("[Trainer] Registering TrainerComponent in Il2Cpp");
+            log.LogMessage("Registering TrainerComponent in Il2Cpp");
 
             try
             {
                 // Register our custom Types in Il2Cpp
-                ClassInjector.RegisterTypeInIl2Cpp<WindowDragHandler>();
                 ClassInjector.RegisterTypeInIl2Cpp<TrainerComponent>();
+                ClassInjector.RegisterTypeInIl2Cpp<UIControls>();
+                ClassInjector.RegisterTypeInIl2Cpp<WindowDragHandler>();
 
                 var go = new GameObject("TrainerObject");                
                 go.AddComponent<TrainerComponent>();
@@ -44,7 +45,7 @@ namespace Trainer
             }
             catch
             {
-                log.LogError("[Trainer] FAILED to Register Il2Cpp Type: TrainerComponent!");
+                log.LogError("FAILED to Register Il2Cpp Type: TrainerComponent!");
             }
 
             #endregion
@@ -67,9 +68,9 @@ namespace Trainer
                 ///
 
                 var original = AccessTools.Method(typeof(UnityEngine.UI.CanvasScaler), "Update");
-                log.LogMessage("[Trainer] Harmony - Original Method: " + original.DeclaringType.Name + "." + original.Name);
+                log.LogMessage(" Original Method: " + original.DeclaringType.Name + "." + original.Name);
                 var post = AccessTools.Method(typeof(TrainerComponent), "Update");
-                log.LogMessage("[Trainer] Harmony - Postfix Method: " + post.DeclaringType.Name + "." + post.Name);
+                log.LogMessage(" Postfix Method: " + post.DeclaringType.Name + "." + post.Name);
                 harmony.Patch(original, postfix: new HarmonyMethod(post));
 
                 #endregion
@@ -78,32 +79,32 @@ namespace Trainer
 
                 // IBeginDragHandler
                 var original2 = AccessTools.Method(typeof(UnityEngine.EventSystems.EventTrigger), "OnBeginDrag");
-                log.LogMessage("[Trainer] Harmony - Original2 Method: " + original2.DeclaringType.Name + "." + original2.Name);
+                log.LogMessage(" Original2 Method: " + original2.DeclaringType.Name + "." + original2.Name);
                 var post2 = AccessTools.Method(typeof(WindowDragHandler), "OnBeginDrag");
-                log.LogMessage("[Trainer] Harmony - Postfix2 Method: " + post2.DeclaringType.Name + "." + post2.Name);
+                log.LogMessage(" Postfix2 Method: " + post2.DeclaringType.Name + "." + post2.Name);
                 harmony.Patch(original2, postfix: new HarmonyMethod(post2));
 
                 // IDragHandler
                 var original3 = AccessTools.Method(typeof(UnityEngine.EventSystems.EventTrigger), "OnDrag");
-                log.LogMessage("[Trainer] Harmony - Original3 Method: " + original3.DeclaringType.Name + "." + original3.Name);
+                log.LogMessage(" Original3 Method: " + original3.DeclaringType.Name + "." + original3.Name);
                 var post3 = AccessTools.Method(typeof(WindowDragHandler), "OnDrag");
-                log.LogMessage("[Trainer] Harmony - Postfix3 Method: " + post3.DeclaringType.Name + "." + post3.Name);
+                log.LogMessage(" Postfix3 Method: " + post3.DeclaringType.Name + "." + post3.Name);
                 harmony.Patch(original3, postfix: new HarmonyMethod(post3));
 
                 // IEndDragHandler
                 var original4 = AccessTools.Method(typeof(UnityEngine.EventSystems.EventTrigger), "OnEndDrag");
-                log.LogMessage("[Trainer] Harmony - Original4 Method: " + original4.DeclaringType.Name + "." + original4.Name);
+                log.LogMessage(" Original4 Method: " + original4.DeclaringType.Name + "." + original4.Name);
                 var post4 = AccessTools.Method(typeof(WindowDragHandler), "OnEndDrag");
-                log.LogMessage("[Trainer] Harmony - Postfix4 Method: " + post4.DeclaringType.Name + "." + post4.Name);
+                log.LogMessage(" Postfix4 Method: " + post4.DeclaringType.Name + "." + post4.Name);
                 harmony.Patch(original4, postfix: new HarmonyMethod(post4));
 
                 #endregion
 
-                log.LogMessage("[Trainer] Harmony - Runtime Patch's Applied");
+                log.LogMessage("Runtime Patch's Applied");
             }
             catch
             {
-                log.LogError("[Trainer] Harmony - FAILED to Apply Patch's!");
+                log.LogError("FAILED to Apply Patch's!");
             }
 
             #endregion
@@ -122,17 +123,17 @@ public static class HarmonyPatches
     {
         bool isFiring = false;
 
-        //BepInExLoader.log.LogMessage("[Trainer] Entered Hooked Update()");
+        //BepInExLoader.log.LogMessage("Entered Hooked Update()");
 
         if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.Backspace) && !isFiring)
         {
             isFiring = true;
 
-            Console.WriteLine("[Trainer] TestComponent - Update() Keypress");
+            Console.WriteLine("TestComponent - Update() Keypress");
 
             File.WriteAllText("C:\\Games\\Orcs Civil War\\TEST.txt", TrainerComponent.GetGameObjects());
 
-            isFiring = false; // We don't use this anymore, I changed to Event.current.use();
+            isFiring = false;
         }
     }
 }
