@@ -566,5 +566,24 @@ namespace Trainer
             return (new Color32(r, g, b, a)).BoxIl2CppObject();
         }
 
+        // Convert Color to RGB
+        public static Il2CppSystem.String ToHtmlStringRGB(this Color color)
+        {
+            Color32 color2 = new Color32((byte)Mathf.Clamp(Mathf.RoundToInt(color.r * 255f), 0, 255), (byte)Mathf.Clamp(Mathf.RoundToInt(color.g * 255f), 0, 255), (byte)Mathf.Clamp(Mathf.RoundToInt(color.b * 255f), 0, 255), 1);
+            return string.Format("{0:X2}{1:X2}{2:X2}", color2.r, color2.g, color2.b);
+        }
+
+        // Convert Color to RGBA
+        public static Il2CppSystem.String ToHtmlStringRGBA(this Color32 color)
+        {
+            Color32 color2 = new Color32((byte)Mathf.Clamp(Mathf.RoundToInt(color.r * 255f), 0, 255), (byte)Mathf.Clamp(Mathf.RoundToInt(color.g * 255f), 0, 255), (byte)Mathf.Clamp(Mathf.RoundToInt(color.b * 255f), 0, 255), (byte)Mathf.Clamp(Mathf.RoundToInt(color.a * 255f), 0, 255));
+            return string.Format("{0:X2}{1:X2}{2:X2}{3:X2}", new object[]
+            {
+                color2.r,
+                color2.g,
+                color2.b,
+                color2.a
+            });
+        }
     }
 }
