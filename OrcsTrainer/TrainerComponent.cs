@@ -84,7 +84,7 @@ namespace Trainer
         {
 #if DEBUG
             // Dump Root GameObjects - Down to Great GrandChildren
-            if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.Backspace) && Event.current.type == EventType.KeyDown)
+            if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.Home) && Event.current.type == EventType.KeyDown)
             {
                 Event.current.Use();
 
@@ -192,8 +192,117 @@ namespace Trainer
                 BepInExLoader.log.LogMessage("[Trainer] TestComponent: Complete!");
             }
 
+            // Dump All Scenes GameObjects - Down to Great GrandChildren
+            if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.End) && Event.current.type == EventType.KeyDown)
+            {
+                Event.current.Use();
+
+                BepInExLoader.log.LogMessage("Dump All Scenes GameObjects/Components");
+                string dbg = "";
+                foreach (GameObject obj in TrainerComponent.GetAllScenesGameObjects())
+                {
+                    BepInExLoader.log.LogMessage("[GameObject]: " + obj.name);
+                    dbg += "[GameObject]: " + obj.name + "\r\n";
+
+                    #region[Get GameObject Components]
+
+                    BepInExLoader.log.LogMessage("\t[Components]:");
+                    dbg += "\t[Components]:\r\n";
+
+                    var comps = obj.GetGameObjectComponents();
+                    foreach (var comp in comps)
+                    {
+                        BepInExLoader.log.LogMessage("\t   " + comp.Name);
+                        dbg += "\t\t" + comp.Name + "\r\n";
+                    }
+
+                    dbg += "\r\n";
+
+                    #endregion
+
+                    #region[Get Child Objects]
+
+                    // Get Children
+                    if (obj.GetParentsChildren().Count > 0)
+                    {
+                        BepInExLoader.log.LogMessage("\t[Children]:");
+                        dbg += "\t[Children]:\r\n";
+
+                        foreach (var child in obj.GetParentsChildren())
+                        {
+                            BepInExLoader.log.LogMessage("\t   " + child.name + ":");
+                            dbg += "\t\t" + child.name + "\r\n";
+
+                            BepInExLoader.log.LogMessage("\t      [Components]:");
+                            dbg += "\t\t\t[Components]:\r\n";
+                            var childcomps = child.GetGameObjectComponents();
+                            foreach (var childcomp in childcomps)
+                            {
+                                BepInExLoader.log.LogMessage("\t         " + childcomp.Name);
+                                dbg += "\t\t\t\t" + childcomp.Name + "\r\n";
+                            }
+
+                            dbg += "\r\n";
+
+                            // Get GrandChildren
+                            if (child.GetParentsChildren().Count > 0)
+                            {
+                                BepInExLoader.log.LogMessage("\t      [GrandChildren]:");
+                                dbg += "\t\t\t[Grand Children]:\r\n";
+
+                                foreach (var grandchild in child.GetParentsChildren())
+                                {
+                                    BepInExLoader.log.LogMessage("\t         " + grandchild.name + ":");
+                                    dbg += "\t\t\t\t" + grandchild.name + "\r\n";
+
+                                    BepInExLoader.log.LogMessage("\t            [Components]:");
+                                    dbg += "\t\t\t\t\t[Components]:\r\n";
+                                    var grandchildcomps = grandchild.GetGameObjectComponents();
+                                    foreach (var grandchildcomp in grandchildcomps)
+                                    {
+                                        BepInExLoader.log.LogMessage("\t               " + grandchildcomp.Name);
+                                        dbg += "\t\t\t\t\t\t" + grandchildcomp.Name + "\r\n";
+                                    }
+
+                                    dbg += "\r\n";
+
+                                    // Get Great GrandChildren
+                                    if (grandchild.GetParentsChildren().Count > 0)
+                                    {
+                                        BepInExLoader.log.LogMessage("\t            [Great GrandChildren]:");
+                                        dbg += "\t\t\t\t\t[Great GrandChildren]:\r\n";
+
+                                        foreach (var greatgrandchild in grandchild.GetParentsChildren())
+                                        {
+                                            BepInExLoader.log.LogMessage("\t               " + greatgrandchild.name + ":");
+                                            dbg += "\t\t\t\t\t\t" + greatgrandchild.name + "\r\n";
+
+                                            BepInExLoader.log.LogMessage("\t                  [Components]:");
+                                            dbg += "\t\t\t\t\t\t\t[Components]:\r\n";
+                                            var greatgrandcomps = greatgrandchild.GetGameObjectComponents();
+                                            foreach (var greatgrandcomp in greatgrandcomps)
+                                            {
+                                                BepInExLoader.log.LogMessage("\t                     " + greatgrandcomp.Name);
+                                                dbg += "\t\t\t\t\t\t\t\t" + greatgrandcomp.Name + "\r\n";
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    dbg += "\r\n";
+
+                    #endregion
+                }
+
+                File.WriteAllText(AppDomain.CurrentDomain.BaseDirectory + "\\ALL_SCENES_OBJECTS_DUMP.txt", dbg);
+                BepInExLoader.log.LogMessage("Complete!");
+            }
+
             // Dump Hierarchy Only
-            if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.F4) && Event.current.type == EventType.KeyDown)
+            if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.PageUp) && Event.current.type == EventType.KeyDown)
             {
                 DumpAll(GetRootSceneGameObjects());
                 Event.current.Use();
@@ -674,13 +783,11 @@ namespace Trainer
 #endif
         #endregion
 
-        #region[Unity GetRootGameObjects]
+        #region[ICalls]
 #if DEBUG
 
-        // Resolve the ICall (internal Unity MethodImp functions)
+        // Resolve the GetRootGameObjects ICall (internal Unity MethodImp functions)
         internal static getRootSceneObjects getRootSceneObjects_iCall = IL2CPP.ResolveICall<getRootSceneObjects>("UnityEngine.SceneManagement.Scene::GetRootGameObjectsInternal");
-
-        // ICall Wrapper
         private static void GetRootGameObjects_Internal(Scene scene, IntPtr list)
         {
             getRootSceneObjects_iCall(scene.handle, list);
@@ -690,10 +797,29 @@ namespace Trainer
         {
             var scene = SceneManager.GetActiveScene();
             var list = new Il2CppSystem.Collections.Generic.List<GameObject>(scene.rootCount);
-            
+
             GetRootGameObjects_Internal(scene, list.Pointer);
 
             return list;
+        }
+
+        private static Il2CppSystem.Collections.Generic.List<GameObject> GetAllScenesGameObjects()
+        {
+            Scene[] array = new Scene[SceneManager.sceneCount];
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                array[i] = SceneManager.GetSceneAt(i);
+            }
+
+            var allObjectsList = new Il2CppSystem.Collections.Generic.List<GameObject>();
+            foreach (var scene in array)
+            {
+                var list = new Il2CppSystem.Collections.Generic.List<GameObject>(scene.rootCount);
+                GetRootGameObjects_Internal(scene, list.Pointer);
+                foreach (var obj in list) { allObjectsList.Add(obj); }
+            }
+
+            return allObjectsList;
         }
 
 #endif

@@ -14,6 +14,7 @@ namespace Trainer
     internal delegate bool d_LoadImage(IntPtr tex, IntPtr data, bool markNonReadable);
 
     internal delegate bool parseHTMLString(IntPtr HTMLString, IntPtr result);
+    //internal delegate bool parseHTMLString(string hexstring, out Color32 result);
 
     #endregion
 
@@ -499,16 +500,17 @@ namespace Trainer
 
         #region[ICall Tests]
 
-        // TryParseHTMLString ICall - Isn't working right yet. Color is always RGBA(0,0,0,0)
-        /* 
+        // TryParseHTMLString ICall - Isn't working right for some reason
+        /*
         internal static parseHTMLString ParseHTMLString_iCall = IL2CPP.ResolveICall<parseHTMLString>("UnityEngine.ColorUtility::DoTryParseHtmlColor");
-        public static bool TryParseHtmlString(Il2CppSystem.String htmlString)
+        public static bool TryParseHtmlString(string htmlString, out Color color)
         {
-            Color32 tmp = new Color32();
+            Color32 tmp;
 
-            bool result = ParseHTMLString_iCall(htmlString.Pointer, StructToPtr(tmp));
+            bool result = ParseHTMLString_iCall(htmlString, out tmp);
+            color = tmp;
 
-            BepInExLoader.log.LogMessage("[Trainer] TryParseHTMLString: Result: " + result.ToString()  + " HTML: " + htmlString + " Color = R: " + tmp.r.ToString() + " G: " + tmp.g.ToString() + " B: " + tmp.b.ToString() + " A: " + tmp.a.ToString());
+            BepInExLoader.log.LogMessage("[Trainer] TryParseHTMLString: Result: " + result.ToString()  + " HEX: " + htmlString + " RGBA: (" + tmp.r.ToString() + "," + tmp.g.ToString() + "," + tmp.b.ToString() + "," + tmp.a.ToString() + ")");
 
             return result;
         }
@@ -520,6 +522,7 @@ namespace Trainer
             return ptr;
         }
         */
+
         #endregion
     }
 
