@@ -39,6 +39,8 @@ namespace Trainer
         [HarmonyPostfix]
         public static void OnDrag(PointerEventData eventData)
 		{
+            // This is odd... On first drag, it doesn't appear to move. The more you drag the panel, the better the dragging works. ???
+
             if (eventData.pointerId != pointerId)
 				return;
 

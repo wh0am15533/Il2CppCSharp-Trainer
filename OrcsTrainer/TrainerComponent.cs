@@ -35,6 +35,10 @@ namespace Trainer
         public static TrainerComponent instance;
 
 #if DEBUG
+        private static bool optionToggle = false;
+
+        private static string spyText = "";
+
         private static GameObject canvas = null;
         private static bool isVisible = false;
         private static GameObject uiPanel = null;
@@ -83,226 +87,16 @@ namespace Trainer
         public static void Update()
         {
 #if DEBUG
-            // Dump Root GameObjects - Down to Great GrandChildren
-            if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.Home) && Event.current.type == EventType.KeyDown)
+            // Just an Option Toggle to give us more Key combinations
+            if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.LeftShift) && Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.Delete) && Event.current.type == EventType.KeyDown)
             {
+                optionToggle = !optionToggle;
+                BepInExLoader.log.LogMessage("Option Toggle Enabled: " + optionToggle.ToString());
                 Event.current.Use();
-
-                BepInExLoader.log.LogMessage("[Trainer] TestComponent: Dump GameObjects/Components");
-                string dbg = "";
-                foreach(GameObject obj in TrainerComponent.GetRootSceneGameObjects())
-                {
-                    BepInExLoader.log.LogMessage("[GameObject]: " + obj.name);
-                    dbg += "[GameObject]: " + obj.name + "\r\n";
-
-                    #region[Get GameObject Components]
-
-                    BepInExLoader.log.LogMessage("\t[Components]:");
-                    dbg += "\t[Components]:\r\n";
-
-                    var comps = obj.GetGameObjectComponents();
-                    foreach(var comp in comps)
-                    {
-                        BepInExLoader.log.LogMessage("\t   " + comp.Name);
-                        dbg += "\t\t" + comp.Name + "\r\n";
-                    }
-
-                    dbg += "\r\n";
-
-                    #endregion
-
-                    #region[Get Child Objects]
-
-                    // Get Children
-                    if (obj.GetParentsChildren().Count > 0)
-                    {
-                        BepInExLoader.log.LogMessage("\t[Children]:");
-                        dbg += "\t[Children]:\r\n";
-
-                        foreach (var child in obj.GetParentsChildren())
-                        {
-                            BepInExLoader.log.LogMessage("\t   " + child.name + ":");
-                            dbg += "\t\t" + child.name + "\r\n";
-                        
-                            BepInExLoader.log.LogMessage("\t      [Components]:");
-                            dbg += "\t\t\t[Components]:\r\n";
-                            var childcomps = child.GetGameObjectComponents();
-                            foreach(var childcomp in childcomps)
-                            {
-                                BepInExLoader.log.LogMessage("\t         " + childcomp.Name);
-                                dbg += "\t\t\t\t" + childcomp.Name + "\r\n";
-                            }
-
-                            dbg += "\r\n";
-
-                            // Get GrandChildren
-                            if (child.GetParentsChildren().Count > 0)
-                            {
-                                BepInExLoader.log.LogMessage("\t      [GrandChildren]:");
-                                dbg += "\t\t\t[Grand Children]:\r\n";
-
-                                foreach (var grandchild in child.GetParentsChildren())
-                                {
-                                    BepInExLoader.log.LogMessage("\t         " + grandchild.name + ":");
-                                    dbg += "\t\t\t\t" + grandchild.name + "\r\n";
-
-                                    BepInExLoader.log.LogMessage("\t            [Components]:");
-                                    dbg += "\t\t\t\t\t[Components]:\r\n";
-                                    var grandchildcomps = grandchild.GetGameObjectComponents();
-                                    foreach (var grandchildcomp in grandchildcomps)
-                                    {
-                                        BepInExLoader.log.LogMessage("\t               " + grandchildcomp.Name);
-                                        dbg += "\t\t\t\t\t\t" + grandchildcomp.Name + "\r\n";
-                                    }
-
-                                    dbg += "\r\n";
-
-                                    // Get Great GrandChildren
-                                    if (grandchild.GetParentsChildren().Count > 0)
-                                    {
-                                        BepInExLoader.log.LogMessage("\t            [Great GrandChildren]:");
-                                        dbg += "\t\t\t\t\t[Great GrandChildren]:\r\n";
-
-                                        foreach (var greatgrandchild in grandchild.GetParentsChildren())
-                                        {
-                                            BepInExLoader.log.LogMessage("\t               " + greatgrandchild.name + ":");
-                                            dbg += "\t\t\t\t\t\t" + greatgrandchild.name + "\r\n";
-
-                                            BepInExLoader.log.LogMessage("\t                  [Components]:");
-                                            dbg += "\t\t\t\t\t\t\t[Components]:\r\n";
-                                            var greatgrandcomps = greatgrandchild.GetGameObjectComponents();
-                                            foreach (var greatgrandcomp in greatgrandcomps)
-                                            {
-                                                BepInExLoader.log.LogMessage("\t                     " + greatgrandcomp.Name);
-                                                dbg += "\t\t\t\t\t\t\t\t" + greatgrandcomp.Name + "\r\n";
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    dbg += "\r\n";
-                    
-                    #endregion
-                }
-
-                File.WriteAllText(AppDomain.CurrentDomain.BaseDirectory + "\\OBJECT_DUMP.txt", dbg);
-                BepInExLoader.log.LogMessage("[Trainer] TestComponent: Complete!");
             }
 
-            // Dump All Scenes GameObjects - Down to Great GrandChildren
-            if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.End) && Event.current.type == EventType.KeyDown)
-            {
-                Event.current.Use();
-
-                BepInExLoader.log.LogMessage("Dump All Scenes GameObjects/Components");
-                string dbg = "";
-                foreach (GameObject obj in TrainerComponent.GetAllScenesGameObjects())
-                {
-                    BepInExLoader.log.LogMessage("[GameObject]: " + obj.name);
-                    dbg += "[GameObject]: " + obj.name + "\r\n";
-
-                    #region[Get GameObject Components]
-
-                    BepInExLoader.log.LogMessage("\t[Components]:");
-                    dbg += "\t[Components]:\r\n";
-
-                    var comps = obj.GetGameObjectComponents();
-                    foreach (var comp in comps)
-                    {
-                        BepInExLoader.log.LogMessage("\t   " + comp.Name);
-                        dbg += "\t\t" + comp.Name + "\r\n";
-                    }
-
-                    dbg += "\r\n";
-
-                    #endregion
-
-                    #region[Get Child Objects]
-
-                    // Get Children
-                    if (obj.GetParentsChildren().Count > 0)
-                    {
-                        BepInExLoader.log.LogMessage("\t[Children]:");
-                        dbg += "\t[Children]:\r\n";
-
-                        foreach (var child in obj.GetParentsChildren())
-                        {
-                            BepInExLoader.log.LogMessage("\t   " + child.name + ":");
-                            dbg += "\t\t" + child.name + "\r\n";
-
-                            BepInExLoader.log.LogMessage("\t      [Components]:");
-                            dbg += "\t\t\t[Components]:\r\n";
-                            var childcomps = child.GetGameObjectComponents();
-                            foreach (var childcomp in childcomps)
-                            {
-                                BepInExLoader.log.LogMessage("\t         " + childcomp.Name);
-                                dbg += "\t\t\t\t" + childcomp.Name + "\r\n";
-                            }
-
-                            dbg += "\r\n";
-
-                            // Get GrandChildren
-                            if (child.GetParentsChildren().Count > 0)
-                            {
-                                BepInExLoader.log.LogMessage("\t      [GrandChildren]:");
-                                dbg += "\t\t\t[Grand Children]:\r\n";
-
-                                foreach (var grandchild in child.GetParentsChildren())
-                                {
-                                    BepInExLoader.log.LogMessage("\t         " + grandchild.name + ":");
-                                    dbg += "\t\t\t\t" + grandchild.name + "\r\n";
-
-                                    BepInExLoader.log.LogMessage("\t            [Components]:");
-                                    dbg += "\t\t\t\t\t[Components]:\r\n";
-                                    var grandchildcomps = grandchild.GetGameObjectComponents();
-                                    foreach (var grandchildcomp in grandchildcomps)
-                                    {
-                                        BepInExLoader.log.LogMessage("\t               " + grandchildcomp.Name);
-                                        dbg += "\t\t\t\t\t\t" + grandchildcomp.Name + "\r\n";
-                                    }
-
-                                    dbg += "\r\n";
-
-                                    // Get Great GrandChildren
-                                    if (grandchild.GetParentsChildren().Count > 0)
-                                    {
-                                        BepInExLoader.log.LogMessage("\t            [Great GrandChildren]:");
-                                        dbg += "\t\t\t\t\t[Great GrandChildren]:\r\n";
-
-                                        foreach (var greatgrandchild in grandchild.GetParentsChildren())
-                                        {
-                                            BepInExLoader.log.LogMessage("\t               " + greatgrandchild.name + ":");
-                                            dbg += "\t\t\t\t\t\t" + greatgrandchild.name + "\r\n";
-
-                                            BepInExLoader.log.LogMessage("\t                  [Components]:");
-                                            dbg += "\t\t\t\t\t\t\t[Components]:\r\n";
-                                            var greatgrandcomps = greatgrandchild.GetGameObjectComponents();
-                                            foreach (var greatgrandcomp in greatgrandcomps)
-                                            {
-                                                BepInExLoader.log.LogMessage("\t                     " + greatgrandcomp.Name);
-                                                dbg += "\t\t\t\t\t\t\t\t" + greatgrandcomp.Name + "\r\n";
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    dbg += "\r\n";
-
-                    #endregion
-                }
-
-                File.WriteAllText(AppDomain.CurrentDomain.BaseDirectory + "\\ALL_SCENES_OBJECTS_DUMP.txt", dbg);
-                BepInExLoader.log.LogMessage("Complete!");
-            }
-
-            // Dump Hierarchy Only
-            if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.PageUp) && Event.current.type == EventType.KeyDown)
+            // Dump All Scenes GameObjects
+            if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.PageDown) && Event.current.type == EventType.KeyDown)
             {
                 DumpAll(GetRootSceneGameObjects());
                 Event.current.Use();
@@ -444,6 +238,49 @@ namespace Trainer
                 Event.current.Use();
             }
 
+            // Object Spy - Requires an EventSystem! (Toggle F5 to test. WIP, currently only detects UI elements)
+            if (optionToggle && EventSystem.current != null && Event.current.type == EventType.mouseDrag)
+            {
+                //BepInExLoader.log.LogMessage("ObjectSpy Fired!");
+
+                if (canvas != null)
+                {
+                    var saInput = EventSystem.current.GetComponent<StandaloneInputModule>();
+                    var evData = saInput.GetMousePointerEventData();
+
+                    string name = "", pname = "", tmpSpyText = "";
+
+                    try
+                    {
+                        name = evData.GetButtonState(PointerEventData.InputButton.Left).eventData.buttonData.pointerEnter.name.ToString();
+                        pname = evData.GetButtonState(PointerEventData.InputButton.Left).eventData.buttonData.pointerCurrentRaycast.module.name;
+
+                        tmpSpyText = "GameObject: " + name + " - Parent: " + pname;
+                    }
+                    catch { /* Not Implemented yet for World objects. TODO: Add Physics and Graphics Raycaster */ }
+
+                    if (tmpSpyText != spyText)
+                    {
+                        BepInExLoader.log.LogMessage(""); // Just a Spacer
+                        BepInExLoader.log.LogMessage("[GameObject]: " + name + " - Parent: " + pname);
+                        spyText = tmpSpyText;
+
+                        BepInExLoader.log.LogMessage("  [Parent Components]:");
+                        var pcomps = evData.GetButtonState(PointerEventData.InputButton.Left).eventData.buttonData.pointerCurrentRaycast.module.gameObject.GetGameObjectComponents();
+                        foreach (var comp in pcomps)
+                        {
+                            BepInExLoader.log.LogMessage("    " + comp.Name);
+                        }
+
+                        BepInExLoader.log.LogMessage("  [GameObject Components]:");
+                        var gcomps = evData.GetButtonState(PointerEventData.InputButton.Left).eventData.buttonData.pointerEnter.GetGameObjectComponents();
+                        foreach (var comp in gcomps)
+                        {
+                            BepInExLoader.log.LogMessage("    " + comp.Name);
+                        }
+                    }
+                }
+            }
 #endif
 
             #region[Orc's Cheats]
@@ -528,10 +365,9 @@ namespace Trainer
         }
 
 
-
         #region[UI Helpers]
 #if DEBUG
-        public Il2CppSystem.Object HTMLString2Color(string htmlcolorstring)
+        public Il2CppSystem.Object HTMLString2Color(Il2CppSystem.String htmlcolorstring)
         {
             Color32 color = new Color32();
 
@@ -825,16 +661,42 @@ namespace Trainer
 #endif
         #endregion
 
-        #region[Hierarchy Dump]
+        #region[Dump All Scenes GameObjects]
 
+#if DEBUG
         private static string dumpLog = "";
-        private static void DumpAll(Il2CppSystem.Collections.Generic.List<GameObject> rootObjects)
+        public static void DumpAll(Il2CppSystem.Collections.Generic.List<GameObject> rootObjects)
         {
-            foreach(GameObject obj in rootObjects)
+            BepInExLoader.log.LogMessage("Dumping Objects...");
+
+            foreach (GameObject obj in rootObjects)
             {
                 dumpLog = "";
-                level = 0;
+                level = 1;
                 prevlevel = 0;
+
+                // Dump this object
+                BepInExLoader.log.LogMessage("[GameObject]: " + obj.name);
+                dumpLog += "[GameObject]: " + obj.name + "\r\n";
+
+                #region[Get GameObject Components if optionToggle]
+                if (optionToggle)
+                {
+                    BepInExLoader.log.LogMessage("  [Components]:");
+                    dumpLog += "  [Components]:\r\n";
+
+                    var comps = obj.GetGameObjectComponents();
+                    foreach (var comp in comps)
+                    {
+                        BepInExLoader.log.LogMessage("    " + comp.Name);
+                        dumpLog += "    " + comp.Name + "\r\n";
+                    }
+
+                    dumpLog += "\r\n";
+                }
+                #endregion
+
+                // Dump the children
                 DisplayChildren(obj.transform);
 
                 if (dumpLog != "")
@@ -842,6 +704,8 @@ namespace Trainer
                     if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "\\OBJECT_DUMPS\\")) { Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + "\\OBJECT_DUMPS\\"); }
                     File.WriteAllText(AppDomain.CurrentDomain.BaseDirectory + "\\OBJECT_DUMPS\\" + obj.name + "_DUMP.txt", dumpLog);
                 }
+
+                BepInExLoader.log.LogMessage("Dump Complete!");
             }
         }
 
@@ -855,28 +719,48 @@ namespace Trainer
             {
                 var t = child.Cast<Transform>();
 
+                // Adjust the indent
                 string consoleprefix = "";
-                //string logprefix = "";
-                for (int cnt = 0; cnt < level; cnt++) { consoleprefix += "  "; /* logprefix += "\t"; */ }
-                
-                BepInExLoader.log.LogMessage(consoleprefix + t.gameObject.name);
-                dumpLog += consoleprefix + t.gameObject.name + "\r\n";
+                for (int cnt = 0; cnt < level; cnt++) { consoleprefix += "  "; }
 
+                // The Actual Logging
+                BepInExLoader.log.LogMessage(consoleprefix + "[GameObject]: " + t.gameObject.name);
+                dumpLog += consoleprefix + "[GameObject]: " + t.gameObject.name + "\r\n";
+
+                #region[Get GameObject Components if optionToggle]
+                if (optionToggle)
+                {
+                    BepInExLoader.log.LogMessage(consoleprefix + "  [Components]:");
+                    dumpLog += consoleprefix + "  [Components]:\r\n";
+
+                    var comps = t.gameObject.GetGameObjectComponents();
+                    foreach (var comp in comps)
+                    {
+                        BepInExLoader.log.LogMessage(consoleprefix + "    " + comp.Name);
+                        dumpLog += consoleprefix + "    " + comp.Name + "\r\n";
+                    }
+
+                    dumpLog += "\r\n";
+                }
+                #endregion
+
+                // Out Inifinate Iterator
                 if (t.childCount > 0)
                 {
                     level += 1;
                     DisplayChildren(t);
                 }
                 else { level = prevlevel; }
-                
+
             }
         }
+#endif
 
         #endregion
-
     }
 
     #region[GameObjects Extensions]
+
 #if DEBUG
     public static class GameObjectExtensions
     {
@@ -921,79 +805,14 @@ namespace Trainer
             if (obj == null)
                 return;
 
-            BepInExLoader.log.LogMessage("[Trainer] Dumping: " + obj.name);
-            string dbg = "";
-
-            BepInExLoader.log.LogMessage("[GameObject]: " + obj.name);
-            dbg += "[GameObject]: " + obj.name + "\r\n";
-
-            #region[Get GameObject Components]
-
-            BepInExLoader.log.LogMessage("\t[Components]:");
-            dbg += "\t[Components]:\r\n";
-
-            var comps = obj.GetGameObjectComponents();
-            foreach (var comp in comps)
-            {
-                BepInExLoader.log.LogMessage("\t   " + comp.Name);
-                dbg += "\t\t" + comp.Name + "\r\n";
-            }
-
-            dbg += "\r\n";
-
-            #endregion
-
-            #region[Get Child Objects]
-
-            BepInExLoader.log.LogMessage("\t[Children]:");
-            dbg += "\t[Children]:\r\n";
-
-            // Get Children
-            foreach (var child in obj.GetParentsChildren())
-            {
-                BepInExLoader.log.LogMessage("\t   " + child.name + ":");
-                dbg += "\t\t" + child.name + "\r\n";
-
-                BepInExLoader.log.LogMessage("\t      [Components]:");
-                dbg += "\t\t\t[Components]:\r\n";
-                var childcomps = child.GetGameObjectComponents();
-                foreach (var childcomp in childcomps)
-                {
-                    BepInExLoader.log.LogMessage("\t         " + childcomp.Name);
-                    dbg += "\t\t\t\t" + childcomp.Name + "\r\n";
-                }
-
-                dbg += "\r\n";
-
-                // Get GrandChildren
-                BepInExLoader.log.LogMessage("\t      [Grand Children]:");
-                dbg += "\t\t\t[Grand Children]:\r\n";
-
-                foreach (var grandchild in child.GetParentsChildren())
-                {
-                    BepInExLoader.log.LogMessage("\t         " + grandchild.name + ":");
-                    dbg += "\t\t\t\t" + grandchild.name + "\r\n";
-
-                    BepInExLoader.log.LogMessage("\t            [Components]:");
-                    dbg += "\t\t\t\t\t[Components]:\r\n";
-                    var grandchildcomps = grandchild.GetGameObjectComponents();
-                    foreach (var grandchildcomp in grandchildcomps)
-                    {
-                        BepInExLoader.log.LogMessage("\t               " + grandchildcomp.Name);
-                        dbg += "\t\t\t\t\t\t" + grandchildcomp.Name + "\r\n";
-                    }
-                }
-            }
-
-            dbg += "\r\n";
-
-            #endregion
-
-            File.WriteAllText(AppDomain.CurrentDomain.BaseDirectory + "\\" + obj.name + "_DUMP.txt", dbg);
-            BepInExLoader.log.LogMessage("[Trainer] TestComponent: Complete!");
+            Il2CppSystem.Collections.Generic.List<GameObject> tmpList = new Il2CppSystem.Collections.Generic.List<GameObject>();
+            tmpList.Add(obj);
+            TrainerComponent.DumpAll(tmpList);
         }
+
     }
 #endif
+
     #endregion
 }
 

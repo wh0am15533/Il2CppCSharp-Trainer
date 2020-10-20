@@ -542,12 +542,20 @@ namespace Trainer
         }
 
         // Convert Hex string to Color32
-        public static Il2CppSystem.Object HexToColor(this string hexString)
+        public static Il2CppSystem.Object HexToColor(this Il2CppSystem.String hexString)
         {
-            if (hexString.IndexOf('#') != -1)
-                hexString = hexString.Replace("#", "");
+            string tmp = hexString;
+
+            if (tmp.IndexOf('#') != -1)
+                tmp = tmp.Replace("#", "");
 
             byte r = 0, g = 0, b = 0, a = 0;
+
+            r = Il2CppSystem.Convert.ToByte(tmp.Substring(0, 2), 16);
+            g = Il2CppSystem.Convert.ToByte(tmp.Substring(2, 2), 16);
+            b = Il2CppSystem.Convert.ToByte(tmp.Substring(4, 2), 16);
+            if (tmp.Length == 8)
+                a = Il2CppSystem.Convert.ToByte(tmp.Substring(6, 2), 16);
 
             #region[Another way but Il2Cpp doesn't like it]
             /*
@@ -558,11 +566,6 @@ namespace Trainer
                 a = int.Parse(hexString.Substring(6, 2), System.Globalization.NumberStyles.AllowHexSpecifier);
             */
             #endregion
-            r = Convert.ToByte(hexString.Substring(0, 2), 16);
-            g = Convert.ToByte(hexString.Substring(2, 2), 16);
-            b = Convert.ToByte(hexString.Substring(4, 2), 16);
-            if (hexString.Length == 8)
-                a = Convert.ToByte(hexString.Substring(6, 2), 16);
 
             //BepInExLoader.log.LogMessage("[Trainer] HexString: " + hexString + " RGBA(" + r.ToString() + "," + g.ToString() + "," + b.ToString() + " ," + a.ToString() + ")");
 
