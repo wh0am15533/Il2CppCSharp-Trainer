@@ -1,28 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿//using System.Diagnostics;
+//using System.Reflection;
+//using System.Threading;
+//using System.Linq;
+//using BepInEx;
+using System;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading;
-using BepInEx;
+using System.Collections.Generic;
 using BepInEx.IL2CPP.UnityEngine; //For UnityEngine.Input
 using UnhollowerBaseLib;
-using UnhollowerRuntimeLib;
+using UnhollowerRuntimeLib; // UnhollowerRuntimeLib.Il2CppType.Of<>
 using HarmonyLib;
-using UnityEngine;
+using UnityEngine; // This has built-in Il2CppType which conflicts with UnhollowerRuntimeLib.Il2CppType (Doesn't contain .Of<>)
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using Object = UnityEngine.Object;
 using UnityEngine.SceneManagement;
+using Object = UnityEngine.Object;
 
 namespace Trainer
 {
     #region[Delegates]
 
-#if DEBUG
     internal delegate void getRootSceneObjects(int handle, IntPtr list);
-#endif
 
     #endregion
 
@@ -33,6 +31,7 @@ namespace Trainer
         #region[Trainer]
 
         public static TrainerComponent instance;
+        private static BepInEx.Logging.ManualLogSource log;
 
 #if DEBUG
         private static bool optionToggle = false;
@@ -62,52 +61,46 @@ namespace Trainer
 
         public TrainerComponent(IntPtr ptr) : base(ptr)
         {
-#if DEBUG
-            BepInExLoader.log.LogMessage("[Trainer] TestComponent - Entered Constructor");
-#endif
+            log = BepInExLoader.log;
+            log.LogMessage("[Trainer] TestComponent - Entered Constructor");
 
             instance = this;
         }
 
         public static void Awake()
         {
-#if DEBUG
-            BepInExLoader.log.LogMessage("[Trainer] TestComponent - Entered Awake()");
-#endif
+            log.LogMessage("[Trainer] TestComponent - Entered Awake()");
         }
 
         public static void Start()
         {
-#if DEBUG
-            BepInExLoader.log.LogMessage("[Trainer] TestComponent - Entered Start()");
-#endif
+            log.LogMessage("[Trainer] TestComponent - Entered Start()");
         }
 
         [HarmonyPostfix] //Harmony requires static method
         public static void Update()
         {
-#if DEBUG
             // Just an Option Toggle to give us more Key combinations
             if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.LeftShift) && Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.Delete) && Event.current.type == EventType.KeyDown)
             {
                 optionToggle = !optionToggle;
-                BepInExLoader.log.LogMessage("Option Toggle Enabled: " + optionToggle.ToString());
+                log.LogMessage("Option Toggle Enabled: " + optionToggle.ToString());
                 Event.current.Use();
             }
-
+            
             // Dump All Scenes GameObjects
             if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.PageDown) && Event.current.type == EventType.KeyDown)
             {
                 DumpAll(GetRootSceneGameObjects());
                 Event.current.Use();
             }
-
+            
             // Test Creating UI Elements
             if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.F5) && Event.current.type == EventType.KeyDown)
             {
                 if (canvas == null)
                 {
-                    BepInExLoader.log.LogMessage("Test Creating UI Elements");
+                    log.LogMessage("Test Creating UI Elements");
 
                     // Create a GameObject with a Canvas
                     canvas = instance.createUICanvas();
@@ -219,7 +212,7 @@ namespace Trainer
 
                     isVisible = true;
 
-                    BepInExLoader.log.LogMessage("Complete!");
+                    log.LogMessage("Complete!");
                 }
                 else
                 {
@@ -237,11 +230,11 @@ namespace Trainer
 
                 Event.current.Use();
             }
-
-            // Object Spy - Requires an EventSystem! (Toggle F5 to test. WIP, currently only detects UI elements)
+            
+            // Object Spy - Requires an EventSystem! (Toggle F5 first then Shift+Delete to test. WIP, currently only detects UI elements)
             if (optionToggle && EventSystem.current != null && Event.current.type == EventType.mouseDrag)
             {
-                //BepInExLoader.log.LogMessage("ObjectSpy Fired!");
+                //log.LogMessage("ObjectSpy Fired!");
 
                 if (canvas != null)
                 {
@@ -261,27 +254,41 @@ namespace Trainer
 
                     if (tmpSpyText != spyText)
                     {
-                        BepInExLoader.log.LogMessage(""); // Just a Spacer
-                        BepInExLoader.log.LogMessage("[GameObject]: " + name + " - Parent: " + pname);
+                        log.LogMessage(""); // Just a Spacer
+                        log.LogMessage("[GameObject]: " + name + " - Parent: " + pname);
                         spyText = tmpSpyText;
 
-                        BepInExLoader.log.LogMessage("  [Parent Components]:");
+                        log.LogMessage("  [Parent Components]:");
                         var pcomps = evData.GetButtonState(PointerEventData.InputButton.Left).eventData.buttonData.pointerCurrentRaycast.module.gameObject.GetGameObjectComponents();
                         foreach (var comp in pcomps)
                         {
-                            BepInExLoader.log.LogMessage("    " + comp.Name);
+                            log.LogMessage("    " + comp.Name);
                         }
 
-                        BepInExLoader.log.LogMessage("  [GameObject Components]:");
+                        log.LogMessage("  [GameObject Components]:");
                         var gcomps = evData.GetButtonState(PointerEventData.InputButton.Left).eventData.buttonData.pointerEnter.GetGameObjectComponents();
                         foreach (var comp in gcomps)
                         {
-                            BepInExLoader.log.LogMessage("    " + comp.Name);
+                            log.LogMessage("    " + comp.Name);
                         }
                     }
                 }
             }
-#endif
+
+            // Test AssetBundle Loading
+            if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.End) && Event.current.type == EventType.KeyDown)
+            {
+                log.LogMessage("Trying to load testAssetBundle...");
+                var testAssetBundle = Il2CppAssetBundleManager.LoadFromFile("C:\\Games\\Orcs Civil War\\testAssetBundle");
+                if (testAssetBundle == null) { log.LogMessage("testAssetBundle is Null!"); return; }
+
+                foreach(var asset in testAssetBundle.AllAssetNames())
+                {
+                    log.LogMessage("Asset Name: " + asset.ToString());
+                }
+            }
+
+
 
             #region[Orc's Cheats]
 
@@ -298,7 +305,7 @@ namespace Trainer
                 // Give Resources
                 if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.F12) && Event.current.type == EventType.KeyDown)
                 {
-                    BepInExLoader.log.LogMessage("[Trainer]: Adding 5,000 Resources");
+                    log.LogMessage("[Trainer]: Adding 5,000 Resources");
                     instance.levelManager.addResources(5000);
                     Event.current.Use();
                 }
@@ -306,7 +313,7 @@ namespace Trainer
                 // Kill All
                 if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.F11) && Event.current.type == EventType.KeyDown)
                 {
-                    BepInExLoader.log.LogMessage("[Trainer]: Killing ALL!");
+                    log.LogMessage("[Trainer]: Killing ALL!");
                     GameObject UnitManagerGO = GameObject.Find("UnitManager");
 
                     if(UnitManagerGO != null)
@@ -331,7 +338,7 @@ namespace Trainer
                         {
                             var child = unitButtonsGO.transform.GetChild(idx);
                             instance._unitButtons.Add(child.gameObject);
-                            BepInExLoader.log.LogMessage("[GameObject]: " + child.name + " IS_ACTIVE: " + child.gameObject.activeSelf.ToString());
+                            log.LogMessage("[GameObject]: " + child.name + " IS_ACTIVE: " + child.gameObject.activeSelf.ToString());
                         }
                     }
 
@@ -366,7 +373,7 @@ namespace Trainer
 
 
         #region[UI Helpers]
-#if DEBUG
+
         public Il2CppSystem.Object HTMLString2Color(Il2CppSystem.String htmlcolorstring)
         {
             Color32 color = new Color32();
@@ -378,7 +385,7 @@ namespace Trainer
             #endregion
 
             color = htmlcolorstring.HexToColor().Unbox<Color32>();
-            //BepInExLoader.log.LogMessage("HexString: " + htmlcolorstring  + "RGBA(" + color.r.ToString() + "," + color.g.ToString() + "," + color.b.ToString() + "," + color.a.ToString() + ")");
+            //log.LogMessage("HexString: " + htmlcolorstring  + "RGBA(" + color.r.ToString() + "," + color.g.ToString() + "," + color.b.ToString() + "," + color.a.ToString() + ")");
 
             return color.BoxIl2CppObject();
         }
@@ -421,7 +428,7 @@ namespace Trainer
 
         public GameObject createUICanvas()
         {
-            BepInExLoader.log.LogMessage("Creating Canvas");
+            log.LogMessage("Creating Canvas");
 
             // Create a new Canvas Object with required components
             GameObject CanvasGO = new GameObject("CanvasGO");
@@ -444,7 +451,7 @@ namespace Trainer
 
             uiResources.background = BgSprite;
 
-            BepInExLoader.log.LogMessage("Creating UI Panel");
+            log.LogMessage("Creating UI Panel");
             GameObject uiPanel = UIControls.CreatePanel(uiResources);
             uiPanel.transform.SetParent(canvas.transform, false);
 
@@ -466,7 +473,7 @@ namespace Trainer
 
             uiResources.standard = NewSprite;
 
-            BepInExLoader.log.LogMessage("Creating UI Button");
+            log.LogMessage("Creating UI Button");
             GameObject uiButton = UIControls.CreateButton(uiResources);
             uiButton.transform.SetParent(parent.transform, false);
 
@@ -480,7 +487,7 @@ namespace Trainer
             uiResources.standard = BgSprite;
             uiResources.checkmark = customCheckmarkSprite;
 
-            BepInExLoader.log.LogMessage("Creating UI Toggle");
+            log.LogMessage("Creating UI Toggle");
             GameObject uiToggle = UIControls.CreateToggle(uiResources);
             uiToggle.transform.SetParent(parent.transform, false);
 
@@ -495,7 +502,7 @@ namespace Trainer
             uiResources.standard = FillSprite;
             uiResources.knob = KnobSprite;
 
-            BepInExLoader.log.LogMessage("Creating UI Slider");
+            log.LogMessage("Creating UI Slider");
             GameObject uiSlider = UIControls.CreateSlider(uiResources);
             uiSlider.transform.SetParent(parent.transform, false);
 
@@ -508,7 +515,7 @@ namespace Trainer
 
             uiResources.inputField = BgSprite;
 
-            BepInExLoader.log.LogMessage("Creating UI InputField");
+            log.LogMessage("Creating UI InputField");
             GameObject uiInputField = UIControls.CreateInputField(uiResources);
             uiInputField.transform.SetParent(parent.transform, false);
 
@@ -536,7 +543,7 @@ namespace Trainer
             // Set the Viewport Mask
             uiResources.mask = customMaskSprite;
 
-            BepInExLoader.log.LogMessage("Creating UI DropDown");
+            log.LogMessage("Creating UI DropDown");
             var uiDropdown = UIControls.CreateDropdown(uiResources);
             uiDropdown.transform.SetParent(parent.transform, false);
 
@@ -549,7 +556,7 @@ namespace Trainer
 
             uiResources.background = BgSprite;
 
-            BepInExLoader.log.LogMessage("Creating UI Image");
+            log.LogMessage("Creating UI Image");
             GameObject uiImage = UIControls.CreateImage(uiResources);
             uiImage.transform.SetParent(parent.transform, false);
 
@@ -562,7 +569,7 @@ namespace Trainer
 
             uiResources.background = BgSprite;
 
-            BepInExLoader.log.LogMessage("Creating UI RawImage");
+            log.LogMessage("Creating UI RawImage");
             GameObject uiRawImage = UIControls.CreateRawImage(uiResources);
             uiRawImage.transform.SetParent(parent.transform, false);
 
@@ -575,7 +582,7 @@ namespace Trainer
 
             uiResources.background = ScrollbarSprite;
 
-            BepInExLoader.log.LogMessage("Creating UI Scrollbar");
+            log.LogMessage("Creating UI Scrollbar");
             GameObject uiScrollbar = UIControls.CreateScrollbar(uiResources);
             uiScrollbar.transform.SetParent(parent.transform, false);
 
@@ -593,7 +600,7 @@ namespace Trainer
             uiResources.standard = customScrollbarSprite;
             uiResources.mask = customMaskSprite;
 
-            BepInExLoader.log.LogMessage("Creating UI ScrollView");
+            log.LogMessage("Creating UI ScrollView");
             GameObject uiScrollView = UIControls.CreateScrollView(uiResources);
             uiScrollView.transform.SetParent(parent.transform, false);
 
@@ -606,7 +613,7 @@ namespace Trainer
 
             uiResources.background = BgSprite;
 
-            BepInExLoader.log.LogMessage("Creating UI Text");
+            log.LogMessage("Creating UI Text");
             GameObject uiText = UIControls.CreateText(uiResources);
             uiText.transform.SetParent(parent.transform, false);
 
@@ -616,11 +623,10 @@ namespace Trainer
 
             return uiText;
         }
-#endif
+
         #endregion
 
         #region[ICalls]
-#if DEBUG
 
         // Resolve the GetRootGameObjects ICall (internal Unity MethodImp functions)
         internal static getRootSceneObjects getRootSceneObjects_iCall = IL2CPP.ResolveICall<getRootSceneObjects>("UnityEngine.SceneManagement.Scene::GetRootGameObjectsInternal");
@@ -658,16 +664,14 @@ namespace Trainer
             return allObjectsList;
         }
 
-#endif
         #endregion
 
         #region[Dump All Scenes GameObjects]
 
-#if DEBUG
         private static string dumpLog = "";
         public static void DumpAll(Il2CppSystem.Collections.Generic.List<GameObject> rootObjects)
         {
-            BepInExLoader.log.LogMessage("Dumping Objects...");
+            log.LogMessage("Dumping Objects...");
 
             foreach (GameObject obj in rootObjects)
             {
@@ -676,19 +680,19 @@ namespace Trainer
                 prevlevel = 0;
 
                 // Dump this object
-                BepInExLoader.log.LogMessage("[GameObject]: " + obj.name);
+                log.LogMessage("[GameObject]: " + obj.name);
                 dumpLog += "[GameObject]: " + obj.name + "\r\n";
 
                 #region[Get GameObject Components if optionToggle]
                 if (optionToggle)
                 {
-                    BepInExLoader.log.LogMessage("  [Components]:");
+                    log.LogMessage("  [Components]:");
                     dumpLog += "  [Components]:\r\n";
 
                     var comps = obj.GetGameObjectComponents();
                     foreach (var comp in comps)
                     {
-                        BepInExLoader.log.LogMessage("    " + comp.Name);
+                        log.LogMessage("    " + comp.Name);
                         dumpLog += "    " + comp.Name + "\r\n";
                     }
 
@@ -705,7 +709,7 @@ namespace Trainer
                     File.WriteAllText(AppDomain.CurrentDomain.BaseDirectory + "\\OBJECT_DUMPS\\" + obj.name + "_DUMP.txt", dumpLog);
                 }
 
-                BepInExLoader.log.LogMessage("Dump Complete!");
+                log.LogMessage("Dump Complete!");
             }
         }
 
@@ -724,19 +728,19 @@ namespace Trainer
                 for (int cnt = 0; cnt < level; cnt++) { consoleprefix += "  "; }
 
                 // The Actual Logging
-                BepInExLoader.log.LogMessage(consoleprefix + "[GameObject]: " + t.gameObject.name);
+                log.LogMessage(consoleprefix + "[GameObject]: " + t.gameObject.name);
                 dumpLog += consoleprefix + "[GameObject]: " + t.gameObject.name + "\r\n";
 
                 #region[Get GameObject Components if optionToggle]
                 if (optionToggle)
                 {
-                    BepInExLoader.log.LogMessage(consoleprefix + "  [Components]:");
+                    log.LogMessage(consoleprefix + "  [Components]:");
                     dumpLog += consoleprefix + "  [Components]:\r\n";
 
                     var comps = t.gameObject.GetGameObjectComponents();
                     foreach (var comp in comps)
                     {
-                        BepInExLoader.log.LogMessage(consoleprefix + "    " + comp.Name);
+                        log.LogMessage(consoleprefix + "    " + comp.Name);
                         dumpLog += consoleprefix + "    " + comp.Name + "\r\n";
                     }
 
@@ -754,14 +758,12 @@ namespace Trainer
 
             }
         }
-#endif
 
         #endregion
     }
 
     #region[GameObjects Extensions]
 
-#if DEBUG
     public static class GameObjectExtensions
     {
         public static bool HasComponent<T>(this GameObject flag) where T : Component
@@ -811,7 +813,6 @@ namespace Trainer
         }
 
     }
-#endif
 
     #endregion
 }

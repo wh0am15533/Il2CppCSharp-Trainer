@@ -112,30 +112,3 @@ namespace Trainer
 
     }
 }
-
-
-#region[Harmony Patches]
-/*
-public static class HarmonyPatches
-{
-    [HarmonyPostfix]
-    public static void Postfix()
-    {
-        bool isFiring = false;
-
-        //BepInExLoader.log.LogMessage("Entered Hooked Update()");
-
-        if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.Backspace) && !isFiring)
-        {
-            isFiring = true;
-
-            Console.WriteLine("TestComponent - Update() Keypress");
-
-            File.WriteAllText("C:\\Games\\Orcs Civil War\\TEST.txt", TrainerComponent.GetGameObjects());
-
-            isFiring = false;
-        }
-    }
-}
-*/
-#endregion
