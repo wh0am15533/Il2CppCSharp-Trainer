@@ -42,7 +42,5 @@ namespace Trainer
                 throw new NullReferenceException("The type must be a Generated Assembly Type.");
             return (T)typeof(T).GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, new Type[] { typeof(IntPtr) }, new ParameterModifier[0]).Invoke(new object[] { ptr });
         }
-
-
     }
 }

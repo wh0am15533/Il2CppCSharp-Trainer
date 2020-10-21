@@ -2,10 +2,8 @@
 using System;
 using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
-using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Runtime.InteropServices;
 
 namespace Trainer
 {

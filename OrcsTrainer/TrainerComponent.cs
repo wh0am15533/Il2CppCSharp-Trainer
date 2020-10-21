@@ -1,8 +1,4 @@
-﻿//using System.Diagnostics;
-//using System.Reflection;
-//using System.Threading;
-//using System.Linq;
-//using BepInEx;
+﻿
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -62,19 +58,19 @@ namespace Trainer
         public TrainerComponent(IntPtr ptr) : base(ptr)
         {
             log = BepInExLoader.log;
-            log.LogMessage("[Trainer] TestComponent - Entered Constructor");
+            log.LogMessage("Entered Constructor");
 
             instance = this;
         }
 
         public static void Awake()
         {
-            log.LogMessage("[Trainer] TestComponent - Entered Awake()");
+            log.LogMessage("Entered Awake()");
         }
 
         public static void Start()
         {
-            log.LogMessage("[Trainer] TestComponent - Entered Start()");
+            log.LogMessage("Entered Start()");
         }
 
         [HarmonyPostfix] //Harmony requires static method
@@ -91,16 +87,23 @@ namespace Trainer
             // Dump All Scenes GameObjects
             if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.PageDown) && Event.current.type == EventType.KeyDown)
             {
-                DumpAll(GetRootSceneGameObjects());
+                DumpAll(GetAllScenesGameObjects());
                 Event.current.Use();
             }
-            
-            // Test Creating UI Elements
+
+            // Dumping Root Scene Objects w/ Values
+            if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.Home) && Event.current.type == EventType.KeyDown)
+            {
+                log.LogMessage("Dumping Root Scene Objects w/ values...");
+                Trainer.Tools.SceneDumper.DumpObjects(GetRootSceneGameObjects().ToArray());
+            }
+
+            // Creating UI Elements
             if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.F5) && Event.current.type == EventType.KeyDown)
             {
                 if (canvas == null)
                 {
-                    log.LogMessage("Test Creating UI Elements");
+                    log.LogMessage("Creating UI Elements");
 
                     // Create a GameObject with a Canvas
                     canvas = instance.createUICanvas();
@@ -275,11 +278,11 @@ namespace Trainer
                 }
             }
 
-            // Test AssetBundle Loading
+            // AssetBundle Loading
             if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.End) && Event.current.type == EventType.KeyDown)
             {
                 log.LogMessage("Trying to load testAssetBundle...");
-                var testAssetBundle = Il2CppAssetBundleManager.LoadFromFile("C:\\Games\\Orcs Civil War\\testAssetBundle");
+                var testAssetBundle = Il2CppAssetBundleManager.LoadFromFile(AppDomain.CurrentDomain.BaseDirectory + "\\testAssetBundle");
                 if (testAssetBundle == null) { log.LogMessage("testAssetBundle is Null!"); return; }
 
                 foreach(var asset in testAssetBundle.AllAssetNames())
