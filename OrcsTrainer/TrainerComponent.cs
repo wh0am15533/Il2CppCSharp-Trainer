@@ -186,7 +186,7 @@ namespace Trainer
                     #region[Add a DropDown]
 
                     // NOTE: This wierd, it does it's thing and work's but then the rest on the UI disappears... hmmm... :/
-                    /*
+                    
                     Sprite dropdownBgSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900FF"));
                     Sprite dropdownScrollbarSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#3E3E42FF"));
                     Sprite dropdownDropDownSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#252526FF"));
@@ -195,7 +195,7 @@ namespace Trainer
                     GameObject uiDropDown = instance.createUIDropDown(uiPanel, dropdownBgSprite, dropdownScrollbarSprite, dropdownDropDownSprite, dropdownCheckmarkSprite, dropdownMaskSprite);
                     Object.DontDestroyOnLoad(uiDropDown);
                     uiDropDown.GetComponent<RectTransform>().localPosition = new Vector3(0, 75, 0);
-                    */
+                    
                     #endregion
 
                     #region[Add a ScrollView]

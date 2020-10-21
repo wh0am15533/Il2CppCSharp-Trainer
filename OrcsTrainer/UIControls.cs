@@ -294,18 +294,23 @@ namespace Trainer
             GameObject gameObject9 = UIControls.CreateUIObject("Item Checkmark", gameObject7);
             GameObject gameObject10 = UIControls.CreateUIObject("Item Label", gameObject7);
             GameObject gameObject11 = UIControls.CreateScrollbar(resources);
+
             gameObject11.name = "Scrollbar";
             UIControls.SetParentAndAlign(gameObject11, gameObject4);
+
             Scrollbar component = gameObject11.GetComponent<Scrollbar>();
             component.SetDirection(Scrollbar.Direction.BottomToTop, true);
+
             RectTransform component2 = gameObject11.GetComponent<RectTransform>();
             component2.anchorMin = Vector2.right;
             component2.anchorMax = Vector2.one;
             component2.pivot = Vector2.one;
             component2.sizeDelta = new Vector2(component2.sizeDelta.x, 0f);
+
             Text text = gameObject10.AddComponent<Text>();
             UIControls.SetDefaultTextValues(text);
             text.alignment = TextAnchor.MiddleLeft;
+
             Image image = gameObject8.AddComponent<Image>();
             image.color = new Color32(245, 245, 245, byte.MaxValue);
             Image image2 = gameObject9.AddComponent<Image>();
@@ -317,34 +322,46 @@ namespace Trainer
             Image image3 = gameObject4.AddComponent<Image>();
             image3.sprite = resources.standard;
             image3.type = Image.Type.Sliced;
+
             ScrollRect scrollRect = gameObject4.AddComponent<ScrollRect>();
-            scrollRect.content = (RectTransform)gameObject6.transform;
-            scrollRect.viewport = (RectTransform)gameObject5.transform;
+
+            // These 2 lines were causing the cast error, why did Unity use this here and elsewere the GetComponent()???
+            //scrollRect.content = (RectTransform)gameObject6.transform;
+            //scrollRect.viewport = (RectTransform)gameObject5.transform;
+            scrollRect.content = gameObject6.GetComponent<RectTransform>();
+            scrollRect.viewport = gameObject5.GetComponent<RectTransform>();
+
             scrollRect.horizontal = false;
             scrollRect.movementType = ScrollRect.MovementType.Clamped;
             scrollRect.verticalScrollbar = component;
             scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
             scrollRect.verticalScrollbarSpacing = -3f;
+
             Mask mask = gameObject5.AddComponent<Mask>();
             mask.showMaskGraphic = false;
+
             Image image4 = gameObject5.AddComponent<Image>();
             image4.sprite = resources.mask;
             image4.type = Image.Type.Sliced;
+
             Text text2 = gameObject2.AddComponent<Text>();
             UIControls.SetDefaultTextValues(text2);
             text2.alignment = TextAnchor.MiddleLeft;
+
             Image image5 = gameObject3.AddComponent<Image>();
             image5.sprite = resources.dropdown;
             Image image6 = gameObject.AddComponent<Image>();
             image6.sprite = resources.standard;
             image6.color = UIControls.s_DefaultSelectableColor;
             image6.type = Image.Type.Sliced;
+
             Dropdown dropdown = gameObject.AddComponent<Dropdown>();
             dropdown.targetGraphic = image6;
             UIControls.SetDefaultColorTransitionValues(dropdown);
             dropdown.template = gameObject4.GetComponent<RectTransform>();
             dropdown.captionText = text2;
             dropdown.itemText = text;
+
             text.text = "Option A";
             dropdown.options.Add(new Dropdown.OptionData
             {
@@ -358,53 +375,65 @@ namespace Trainer
             {
                 text = "Option C"
             });
+
             dropdown.RefreshShownValue();
+
             RectTransform component3 = gameObject2.GetComponent<RectTransform>();
             component3.anchorMin = Vector2.zero;
             component3.anchorMax = Vector2.one;
             component3.offsetMin = new Vector2(10f, 6f);
             component3.offsetMax = new Vector2(-25f, -7f);
+
             RectTransform component4 = gameObject3.GetComponent<RectTransform>();
             component4.anchorMin = new Vector2(1f, 0.5f);
             component4.anchorMax = new Vector2(1f, 0.5f);
             component4.sizeDelta = new Vector2(20f, 20f);
             component4.anchoredPosition = new Vector2(-15f, 0f);
+
             RectTransform component5 = gameObject4.GetComponent<RectTransform>();
             component5.anchorMin = new Vector2(0f, 0f);
             component5.anchorMax = new Vector2(1f, 0f);
             component5.pivot = new Vector2(0.5f, 1f);
             component5.anchoredPosition = new Vector2(0f, 2f);
             component5.sizeDelta = new Vector2(0f, 150f);
+
             RectTransform component6 = gameObject5.GetComponent<RectTransform>();
             component6.anchorMin = new Vector2(0f, 0f);
             component6.anchorMax = new Vector2(1f, 1f);
             component6.sizeDelta = new Vector2(-18f, 0f);
             component6.pivot = new Vector2(0f, 1f);
+
             RectTransform component7 = gameObject6.GetComponent<RectTransform>();
             component7.anchorMin = new Vector2(0f, 1f);
             component7.anchorMax = new Vector2(1f, 1f);
             component7.pivot = new Vector2(0.5f, 1f);
             component7.anchoredPosition = new Vector2(0f, 0f);
             component7.sizeDelta = new Vector2(0f, 28f);
+
             RectTransform component8 = gameObject7.GetComponent<RectTransform>();
             component8.anchorMin = new Vector2(0f, 0.5f);
             component8.anchorMax = new Vector2(1f, 0.5f);
             component8.sizeDelta = new Vector2(0f, 20f);
+
             RectTransform component9 = gameObject8.GetComponent<RectTransform>();
             component9.anchorMin = Vector2.zero;
             component9.anchorMax = Vector2.one;
             component9.sizeDelta = Vector2.zero;
+
             RectTransform component10 = gameObject9.GetComponent<RectTransform>();
             component10.anchorMin = new Vector2(0f, 0.5f);
             component10.anchorMax = new Vector2(0f, 0.5f);
             component10.sizeDelta = new Vector2(20f, 20f);
             component10.anchoredPosition = new Vector2(10f, 0f);
+
             RectTransform component11 = gameObject10.GetComponent<RectTransform>();
             component11.anchorMin = Vector2.zero;
             component11.anchorMax = Vector2.one;
             component11.offsetMin = new Vector2(20f, 1f);
             component11.offsetMax = new Vector2(-10f, -2f);
+            
             gameObject4.SetActive(false);
+
             return gameObject;
         }
 
