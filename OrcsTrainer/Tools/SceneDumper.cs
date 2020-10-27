@@ -1,8 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
+using HarmonyLib;
 using UnityEngine;
 using Il2CppSystem.Reflection;
 using Il2CppSystem.Diagnostics;
@@ -13,7 +16,7 @@ namespace Trainer.Tools
     {
         public static void DumpObjects(params GameObject[] objects)
         {
-            var fname = AppDomain.CurrentDomain.BaseDirectory + "\\SceneDump.txt"; //Path.GetTempFileName()
+            var fname = AppDomain.CurrentDomain.BaseDirectory + "\\SceneDump.txt";
 
             BepInExLoader.log.LogMessage($"Dumping {objects.Length} GameObjects to {fname}");
 
@@ -27,10 +30,13 @@ namespace Trainer.Tools
             BepInExLoader.log.LogMessage("Complete!");
             BepInExLoader.log.LogMessage($"Opening {fname}");
 
-            Trainer.Helpers.StartExternalProcess.Start("notepad.exe " + fname, AppDomain.CurrentDomain.BaseDirectory);            
-            // Il2CppSystem way doesn't work - SUCCESS Exception. WTF??!
+            // Currently System.Process doesn't appear to be working in BepInEx Preview v6.0, So use Native methods. UPDATE: Application.OpenUrl(filepath); works just fine though :)
+            //Trainer.Helpers.StartExternalProcess.Start("notepad.exe " + fname, AppDomain.CurrentDomain.BaseDirectory);
+            Application.OpenURL(fname); // Will open in default associated app
+            #region[Il2CppSystem way doesn't work - SUCCESS Exception. WTF??!]
             //var pi = new ProcessStartInfo(fname) { UseShellExecute = true };
             //Process.Start(pi);
+            #endregion
         }
 
         private static void PrintRecursive(TextWriter sw, GameObject obj, int d = 0)
@@ -46,20 +52,23 @@ namespace Trainer.Tools
             {
                 sw.WriteLine(pad2 + "::" + c.GetIl2CppType().Name);
 
-                var ct = c.GetIl2CppType();
-
-                var props = ct.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance);
-                foreach (var p in props)
+                // Print values if optionToggle is true
+                if (TrainerComponent.optionToggle)
                 {
-                    try
+                    var ct = c.GetIl2CppType();
+                    var props = ct.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance);
+                    foreach (var p in props)
                     {
-                        var v = p.GetValue(c);
-                        sw.WriteLine(pad3 + "@" + p.Name + "<" + p.PropertyType.Name + "> = " + v.ToString());
-                    }
-                    catch (Exception e)
-                    {
-                        sw.WriteLine(pad3 + "@" + p.Name + "<" + p.PropertyType.Name + "> = null");
-                        //BepInExLoader.log.LogMessage(p.Name + "<" + p.PropertyType.Name + "> = " + "Couldn't Resolve Value!"); //"Null Property or No Get() Method Exists!"
+                        try
+                        {
+                            var v = p.GetValue(c);
+                            sw.WriteLine(pad3 + "@" + p.Name + "<" + p.PropertyType.Name + "> = " + v.ToString());
+                        }
+                        catch (Exception e)
+                        {
+                            sw.WriteLine(pad3 + "@" + p.Name + "<" + p.PropertyType.Name + "> = null");
+                            //BepInExLoader.log.LogMessage(p.Name + "<" + p.PropertyType.Name + "> = " + "Couldn't Resolve Value!"); //"Null Property or No Get() Method Exists!"
+                        }
                     }
                 }
             }

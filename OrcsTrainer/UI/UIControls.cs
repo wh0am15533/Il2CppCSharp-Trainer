@@ -5,7 +5,7 @@ using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Trainer
+namespace Trainer.UI
 {
     #region[Delegates]
 
@@ -121,14 +121,16 @@ namespace Trainer
         public static GameObject CreateImage(UIControls.Resources resources)
         {
             GameObject gameObject = UIControls.CreateUIElementRoot("Image", UIControls.s_ImageElementSize);
-            gameObject.AddComponent<Image>();
+            Image image = gameObject.AddComponent<Image>();
+            image.sprite = resources.background;
             return gameObject;
         }
 
         public static GameObject CreateRawImage(UIControls.Resources resources)
         {
             GameObject gameObject = UIControls.CreateUIElementRoot("RawImage", UIControls.s_ImageElementSize);
-            gameObject.AddComponent<RawImage>();
+            RawImage rawImage = gameObject.AddComponent<RawImage>();
+            rawImage.texture = resources.background.texture;
             return gameObject;
         }
 

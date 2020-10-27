@@ -5,22 +5,29 @@ using UnityEngine;
 using Object = UnityEngine.Object;
 using UnityEngine.EventSystems;
 
-namespace Trainer
+namespace Trainer.UI
 {
 	public class WindowDragHandler : MonoBehaviour
 	{
-		private const int NON_EXISTING_TOUCH = -98456;
+        public static WindowDragHandler instance;
+
+        private const int NON_EXISTING_TOUCH = -98456;
 
 		private static RectTransform rectTransform;
 
 		private static int pointerId = NON_EXISTING_TOUCH;
 		private static Vector2 initialTouchPos;
 
-        public WindowDragHandler(IntPtr ptr) : base(ptr) { }
+        public WindowDragHandler(IntPtr ptr) : base(ptr)
+        {
+            //BepInExLoader.log.LogMessage("WindowDragHandler Constructor");
+            instance = this;
+        }
 
         public void Awake()
 		{
-			rectTransform = gameObject.GetComponent<RectTransform>();
+            //BepInExLoader.log.LogMessage("WindowsDragHandler Awake()");
+            rectTransform = gameObject.GetComponent<RectTransform>();
 		}
 
         [HarmonyPostfix]

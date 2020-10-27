@@ -2,7 +2,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using BepInEx.IL2CPP.UnityEngine; //For UnityEngine.Input
+using Input = BepInEx.IL2CPP.UnityEngine.Input; //For UnityEngine.Input
 using UnhollowerBaseLib;
 using UnhollowerRuntimeLib; // UnhollowerRuntimeLib.Il2CppType.Of<>
 using HarmonyLib;
@@ -11,6 +11,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
+using Trainer.UI;
 
 namespace Trainer
 {
@@ -27,16 +28,23 @@ namespace Trainer
         #region[Trainer]
 
         public static TrainerComponent instance;
+        private static bool initialized = false;
         private static BepInEx.Logging.ManualLogSource log;
+        public static bool optionToggle = false;
+        private static string spyText = "";
+        private static Il2CppAssetBundle testAssetBundle = null;
 
 #if DEBUG
-        private static bool optionToggle = false;
-
-        private static string spyText = "";
 
         private static GameObject canvas = null;
         private static bool isVisible = false;
         private static GameObject uiPanel = null;
+        private static Sprite stompy = null; // Test Sprite from AssetBundle
+        private static GameObject positionDebug = null;
+
+        private static GameObject onGUIHookObject = null;
+        private static I2.Loc.RealTimeTranslation onGUIHookComp  = null;
+
 #endif
 
         #endregion
@@ -58,24 +66,116 @@ namespace Trainer
         public TrainerComponent(IntPtr ptr) : base(ptr)
         {
             log = BepInExLoader.log;
-            log.LogMessage("Entered Constructor");
+            log.LogMessage("Entered TrainerComponent Constructor");
 
             instance = this;
         }
 
+        private static void Initialize()
+        {
+            // AssetBundle Loading
+            if (testAssetBundle == null)
+            {
+                log.LogMessage("Trying to Load AssetBundle...");
+                testAssetBundle = Il2CppAssetBundleManager.LoadFromFile(AppDomain.CurrentDomain.BaseDirectory + "\\AssetBundles\\testassetbundle");
+                if (testAssetBundle == null) { log.LogMessage("AssetBundle Failed to Load!"); return; }
+
+                // Print out asset names/paths
+                log.LogMessage("Assets:");
+                foreach (var asset in testAssetBundle.AllAssetNames())
+                {
+                    log.LogMessage("   Asset Name: " + asset.ToString());
+                }
+
+                #region[Test Loading a prefab and instantiating it]
+                /*
+                
+                // NOTE: There's currently a error in Unhollower that throws a NullReference exception, but the object and components DO get instantiated
+                // but the prefab doesn't display. It and it's components are running though.
+
+                log.LogMessage("Trying to Load Prefab...");
+
+                var prefab = testAssetBundle.LoadAsset<GameObject>("SOME PREFAB ASSET");
+                if (prefab != null)
+                {
+                    log.LogMessage("Asset Loaded!");
+
+                    // Instantiate the object
+                    log.LogMessage("Trying to Instantiate Prefab...");
+                    var t = Instantiate(prefab, new Vector3(0f, 0f), Quaternion.identity);
+                    if (t != null) { log.LogMessage("Prefab Instantiated! Position: " + t.transform.position.ToString()); } else { log.LogMessage("Failed to Instantiated Prefab!"); }
+
+                    #region[Test adding a custom component and make sure it works]
+                    *//*
+                    if (t != null)
+                    {
+                        log.LogMessage("Test adding a custom component and make sure it works");                        
+                        var type = UnhollowerRuntimeLib.Il2CppType.Of<WindowDragHandler>();
+                        comp = t.AddComponent(type).Cast<WindowDragHandler>();
+                        log.LogMessage("Component testBool: " + comp.testBool.ToString());
+                    }
+                    *//*
+                    #endregion
+                }
+                else { log.LogMessage("Failed to Load Asset!"); }
+                */
+                #endregion
+
+            }
+
+            // Create our UI
+            instance.CreateUI();
+
+            #region[Display Trainer HotKeys]
+
+            log.LogMessage(" ");
+            log.LogMessage("HotKeys:");
+            log.LogMessage("   Shift+Delete = Enable/Disable Option Toggle");
+            log.LogMessage("   Keypress + optionToggle = Display Mouse/World/Viewport Positions for Debugging");
+            log.LogMessage("   A = Dump All Scene's Objects (w/ optionToggle True prints components also)");
+            log.LogMessage("   R = Dump Current Scene's Root Objects w/ Values (w/ optionToggle True prints components also)");
+            log.LogMessage("   S = Display Scene Details");
+            log.LogMessage("   U = Test Creating UI Elements");
+            log.LogMessage("   X = Dump Objects to XML (w/ optionToggle uses FindObjectsOfType<>() (Finds more, but loss of Hierarchy)");
+            log.LogMessage("   T = Toggle Tooltip w/ optionToggle");
+            log.LogMessage(" ");
+
+            #endregion
+
+            #region[Example of how we kickstart OnGUI() when gme never loads it.]
+
+            #region[DevNote]
+            // In this game this is a bitch, since it has it's own GUI elements that you can't get rid of.
+            // Tried redirecting the method and I2.Loc.RealTimeTranslation started complaining since it's 
+            // Constanting looking for a value. So this is just an example of Kickstarting OnGUI when doesnt load it.
+            #endregion
+            log.LogMessage("Kickstarting OnGUI...");
+            onGUIHookObject = new GameObject("OnGUIHookObject");
+            onGUIHookComp = onGUIHookObject.AddComponent<I2.Loc.RealTimeTranslation>();
+            onGUIHookComp.enabled = false;
+            Object.DontDestroyOnLoad(onGUIHookObject);
+            
+            #endregion
+
+            initialized = true;
+        }
+
         public static void Awake()
         {
-            log.LogMessage("Entered Awake()");
+            log.LogMessage("Entered TrainerComponent Awake()");
         }
 
         public static void Start()
         {
-            log.LogMessage("Entered Start()");
+            log.LogMessage("Entered TrainerComponent Start()");
         }
 
-        [HarmonyPostfix] //Harmony requires static method
+        [HarmonyPostfix]
         public static void Update()
         {
+            if (!initialized) { Initialize(); }
+
+            // Note: You can use the regular Input also for Key events, see the usings
             // Just an Option Toggle to give us more Key combinations
             if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.LeftShift) && Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.Delete) && Event.current.type == EventType.KeyDown)
             {
@@ -84,156 +184,16 @@ namespace Trainer
                 Event.current.Use();
             }
             
-            // Dump All Scenes GameObjects
-            if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.PageDown) && Event.current.type == EventType.KeyDown)
+            // Toggle TooltipGUI
+            if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.T) && optionToggle && EventSystem.current != null && Event.current.type == EventType.KeyDown)
             {
-                DumpAll(GetAllScenesGameObjects());
-                Event.current.Use();
-            }
-
-            // Dumping Root Scene Objects w/ Values
-            if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.Home) && Event.current.type == EventType.KeyDown)
-            {
-                log.LogMessage("Dumping Root Scene Objects w/ values...");
-                Trainer.Tools.SceneDumper.DumpObjects(GetRootSceneGameObjects().ToArray());
-            }
-
-            // Creating UI Elements
-            if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.F5) && Event.current.type == EventType.KeyDown)
-            {
-                if (canvas == null)
-                {
-                    log.LogMessage("Creating UI Elements");
-
-                    // Create a GameObject with a Canvas
-                    canvas = instance.createUICanvas();
-                    Object.DontDestroyOnLoad(canvas);
-
-                    // Add a Panel to the Canvas. See createUIPanel for why we pass height/width as string
-                    uiPanel = instance.createUIPanel(canvas, "550", "200", null);
-
-                    // This is how we'll hook mouse Events for window dragging
-                    uiPanel.AddComponent<EventTrigger>();
-                    uiPanel.AddComponent<WindowDragHandler>();
-
-                    Image panelImage = uiPanel.GetComponent<Image>();
-                    panelImage.color = instance.HTMLString2Color("#2D2D30FF").Unbox<Color32>();
-
-                    #region[Panel Elements]
-
-                    // NOTE: Elements are spaced in increments/decrements of 35 in localPosition 
-
-                    #region[Add a Button]
-
-                    Sprite btnSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900FF"));
-                    GameObject uiButton = instance.createUIButton(uiPanel, btnSprite);
-                    uiButton.GetComponent<RectTransform>().localPosition = new Vector3(0, 250, 0);
-
-                    #endregion
-
-                    #region[Add a Toggle]
-
-                    Sprite toggleBgSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#3E3E42FF"));
-                    Sprite toggleSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900FF"));
-                    GameObject uiToggle = instance.createUIToggle(uiPanel, toggleBgSprite, toggleSprite);
-                    uiToggle.GetComponentInChildren<Text>().color = Color.white;
-                    uiToggle.GetComponentInChildren<Toggle>().isOn = false;
-                    uiToggle.GetComponent<RectTransform>().localPosition = new Vector3(0, 215, 0);
-
-                    #endregion
-
-                    #region[Add a Slider]
-
-                    Sprite sliderBgSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#9E9E9EFF"));
-                    Sprite sliderFillSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900FF"));
-                    Sprite sliderKnobSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#191919FF"));
-                    GameObject uiSlider = instance.createUISlider(uiPanel, sliderBgSprite, sliderFillSprite, sliderKnobSprite);
-                    uiSlider.GetComponentInChildren<Slider>().value = 0.5f;
-                    uiSlider.GetComponent<RectTransform>().localPosition = new Vector3(0, 185, 0);
-
-                    #endregion
-
-                    #region[Add a Text (Label)]
-
-                    Sprite txtBgSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900FF"));
-                    GameObject uiText = instance.createUIText(uiPanel, txtBgSprite, "#FFFFFFFF");
-                    uiText.GetComponent<Text>().text = "This is a new Text Label";
-                    uiText.GetComponent<RectTransform>().localPosition = new Vector3(0, 150, 0);
-
-                    #endregion
-
-                    #region[Add a InputField]
-
-                    Sprite inputFieldSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900FF"));
-                    GameObject uiInputField = instance.createUIInputField(uiPanel, inputFieldSprite, "#000000FF");
-                    #region[Dev Note]
-                    // The following line is odd. It sets the text but doesn't display it, WTF? The default child object PlaceHolder 
-                    // has Text component but Unhollower thinks it's a UnityEngine.Graphic?
-                    //      uiInputField.transform.GetChild(0).gameObject.GetComponent<Text>().text = "Search...";
-                    // Checked in Unity Editor too, it's definately Text, why does unhollower think it's Graphic?
-                    // 
-                    // We'll just use the InputField component directly. It works, but PlaceHolder is nice...
-                    #endregion
-                    uiInputField.GetComponent<InputField>().text = "Some Input Field...";
-                    uiInputField.GetComponent<RectTransform>().localPosition = new Vector3(0, 115, 0);
-
-                    #endregion
-
-                    #region[Add a DropDown]
-
-                    // NOTE: This wierd, it does it's thing and work's but then the rest on the UI disappears... hmmm... :/
-                    
-                    Sprite dropdownBgSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900FF"));
-                    Sprite dropdownScrollbarSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#3E3E42FF"));
-                    Sprite dropdownDropDownSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#252526FF"));
-                    Sprite dropdownCheckmarkSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900FF"));
-                    Sprite dropdownMaskSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#1E1E1EFF"));
-                    GameObject uiDropDown = instance.createUIDropDown(uiPanel, dropdownBgSprite, dropdownScrollbarSprite, dropdownDropDownSprite, dropdownCheckmarkSprite, dropdownMaskSprite);
-                    Object.DontDestroyOnLoad(uiDropDown);
-                    uiDropDown.GetComponent<RectTransform>().localPosition = new Vector3(0, 75, 0);
-                    
-                    #endregion
-
-                    #region[Add a ScrollView]
-
-                    Sprite scrollviewBgSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#9E9E9EFF"));
-                    Sprite scrollviewScrollbarSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#3E3E42FF"));
-                    Sprite scrollviewMaskSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#3E3E42FF"));
-                    GameObject uiScrollView = instance.createUIScrollView(uiPanel, scrollviewBgSprite, scrollviewMaskSprite, scrollviewScrollbarSprite);
-
-                    // Set some content
-                    GameObject content = uiScrollView.GetComponent<ScrollRect>().content.gameObject;
-                    GameObject contentTextObj = instance.createUIText(content, scrollviewBgSprite, "#FFFFFFFF");
-                    contentTextObj.GetComponent<Text>().text = "ScrollView Element";
-                    contentTextObj.GetComponent<RectTransform>().localPosition = new Vector3(120, -50, 0);
-
-                    uiScrollView.GetComponent<RectTransform>().localPosition = new Vector3(0, -75, 0);
-
-                    #endregion
-
-                    #endregion
-
-                    isVisible = true;
-
-                    log.LogMessage("Complete!");
-                }
-                else
-                {
-                    if (isVisible)
-                    {
-                        canvas.SetActive(false);
-                        isVisible = false;
-                    }
-                    else
-                    {
-                        canvas.SetActive(true);
-                        isVisible = true;
-                    }
-                }
+                onGUIHookComp.enabled = !onGUIHookComp.enabled;
 
                 Event.current.Use();
+
+                //if (onGUIHookComp.enabled) { BepInExLoader.t.Invoke(); } //Invalid IL code error because of Unhollower
             }
-            
+
             // Object Spy - Requires an EventSystem! (Toggle F5 first then Shift+Delete to test. WIP, currently only detects UI elements)
             if (optionToggle && EventSystem.current != null && Event.current.type == EventType.mouseDrag)
             {
@@ -252,6 +212,8 @@ namespace Trainer
                         pname = evData.GetButtonState(PointerEventData.InputButton.Left).eventData.buttonData.pointerCurrentRaycast.module.name;
 
                         tmpSpyText = "GameObject: " + name + " - Parent: " + pname;
+
+                        TooltipGUI.Tooltip = name;
                     }
                     catch { /* Not Implemented yet for World objects. TODO: Add Physics and Graphics Raycaster */ }
 
@@ -276,20 +238,144 @@ namespace Trainer
                         }
                     }
                 }
+
+                Event.current.Use();
+            }
+            if (optionToggle && EventSystem.current != null && Event.current.type == EventType.mouseUp)
+            {
+                // Clears the tooltip on MouseUp
+                TooltipGUI.Tooltip = "";
+                Event.current.Use();
             }
 
-            // AssetBundle Loading
-            if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.End) && Event.current.type == EventType.KeyDown)
+            // Dump All Scenes GameObjects (w/ optionToggle True prints components also)
+            if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.A) && Event.current.type == EventType.KeyDown)
             {
-                log.LogMessage("Trying to load testAssetBundle...");
-                var testAssetBundle = Il2CppAssetBundleManager.LoadFromFile(AppDomain.CurrentDomain.BaseDirectory + "\\testAssetBundle");
-                if (testAssetBundle == null) { log.LogMessage("testAssetBundle is Null!"); return; }
+                DumpAll(GetAllScenesGameObjects());
+                Event.current.Use();
+            }
 
-                foreach(var asset in testAssetBundle.AllAssetNames())
+            // Dumping Root Scene Objects w/ Values (w/ optionToggle True prints components also)
+            if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.R) && Event.current.type == EventType.KeyDown)
+            {
+                log.LogMessage("Dumping Root Scene Objects w/ values...");
+                Trainer.Tools.SceneDumper.DumpObjects(GetRootSceneGameObjects().ToArray());
+                Event.current.Use();
+            }
+
+            // Create UI if needed otherwise Show/Hide
+            if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.U) && Event.current.type == EventType.KeyDown)
+            {
+                if (canvas == null)
                 {
-                    log.LogMessage("Asset Name: " + asset.ToString());
+                    instance.CreateUI();
+                }
+                else
+                {
+                    if (isVisible)
+                    {
+                        canvas.SetActive(false);
+                        isVisible = false;
+                    }
+                    else
+                    {
+                        canvas.SetActive(true);
+                        isVisible = true;
+                    }
+                }
+
+                Event.current.Use();
+            }
+            
+            // Display Scene Details
+            if (UnityEngine.Input.GetKeyDown(KeyCode.S) && Event.current.type == EventType.KeyDown)
+            {
+                log.LogMessage(" ");
+                log.LogMessage("Scene Details:");
+                Scene activeScene = SceneManager.GetActiveScene();
+                log.LogMessage("   Scene Name: " + activeScene.name);
+                log.LogMessage("   Scene Build Index: " + activeScene.buildIndex.ToString());
+                log.LogMessage("   Root Object Count: " + activeScene.rootCount.ToString());
+
+                log.LogMessage(" ");
+                log.LogMessage("   Camera's:");
+                foreach (var cam in Camera.allCameras)
+                {
+                    log.LogMessage("      Cam: " + cam.name + " GameObject: " + cam.gameObject.name);
+                }
+
+                log.LogMessage(" ");
+                log.LogMessage("   Predefined Layers... (-1 = Not Found)");
+                string[] predefinedLayers = { "Default", "TransparentFX", "Ignore Raycast", "Water", "UI", "Player", String.Empty };
+                foreach (string layer in predefinedLayers)
+                {
+                    log.LogMessage("      Layer: [" + LayerMask.NameToLayer(layer) + "] " + layer);
+                }
+
+                log.LogMessage(" ");
+                log.LogMessage("   Root Objects:");                
+                foreach(var obj in GetRootSceneGameObjects())
+                {
+                    log.LogMessage("      Name: " + obj.name);
+                    log.LogMessage("         Enabled: " + obj.activeSelf.ToString());
+                    log.LogMessage("         Layer: " + obj.layer.ToString());
+                    log.LogMessage("         Position: " + obj.transform.position.ToString());
+                    log.LogMessage("         Local Position: " + obj.transform.localPosition.ToString());
+                    log.LogMessage("         Components: ");
+                    foreach(var comp in obj.GetComponents<Component>())
+                    {
+                        log.LogMessage("            " + comp.name + "(" + comp.GetIl2CppType().Name + ")");
+                    }
+                    log.LogMessage(" ");
+
                 }
             }
+
+            // Dump All Scene's Objects to XML (w/ optionToggle True uses FindObjectsOfType<GameOBject>() (Finds more, but at loss of Hierarchy))
+            if (UnityEngine.Input.GetKeyDown(KeyCode.X) && Event.current.type == EventType.KeyDown)
+            {
+                log.LogMessage("");
+
+                List<GameObjectDetails> objectTree = new List<GameObjectDetails>();
+
+                // Doesn't show DontDestroyOnLoad objects. GameObject.FindObjectsOfType<GameObject>() does, but loses heirarchy
+                if (!optionToggle)
+                {
+                    log.LogMessage("Dumping All Objects to XML using GetAllScenesGameObject()...");
+                    foreach (var obj in GetAllScenesGameObjects()) { objectTree.Add(new GameObjectDetails(obj)); }
+                }
+                else
+                {
+                    log.LogMessage("Dumping All Objects to XML using GameObject.FindObjectsOfType<GameObject>()...");
+                    foreach (var obj in GameObject.FindObjectsOfType<GameObject>()) { objectTree.Add(new GameObjectDetails(obj)); }
+                }
+
+                File.WriteAllText(AppDomain.CurrentDomain.BaseDirectory + "\\AllObjectsDump.xml", GameObjectDetails.XMLSerialize(objectTree));
+
+                log.LogMessage("Complete!");
+                log.LogMessage("XML written to " + (AppDomain.CurrentDomain.BaseDirectory + "\\AllObjectsDump.xml").Replace("\\\\", "\\"));
+
+                string path = (AppDomain.CurrentDomain.BaseDirectory + "\\AllObjectsDump.xml").Replace("\\\\", "\\");                
+                Application.OpenURL("file:///" + path.Replace("\\", "/")); // Opens in default associated app
+
+                Event.current.Use();
+            }
+
+            // Display Mouse/World/View Positions for Debugging
+            if (positionDebug == null) { positionDebug = GameObject.Find("TitleImage"); } // Just a refence object to compare values
+            if (optionToggle && EventSystem.current != null && Event.current.type == EventType.KeyDown)
+            {
+                log.LogMessage(" ");
+                log.LogMessage("Mouse Debug Info:");
+                log.LogMessage("   TitleImage POS: " + positionDebug.transform.position.ToString());
+                log.LogMessage("   Mouse POS:      " + UnityEngine.Input.mousePosition.ToString());
+                log.LogMessage("   Mouse2World:    " + Camera.current.ScreenToWorldPoint(UnityEngine.Input.mousePosition).ToString());
+                log.LogMessage("   Mouse2Viewport: " + Camera.current.ScreenToViewportPoint(UnityEngine.Input.mousePosition).ToString());
+                log.LogMessage(" ");
+
+                Event.current.Use();
+            }
+
 
 
 
@@ -374,8 +460,146 @@ namespace Trainer
             #endregion
         }
 
+        public void OnGUI()
+        {
+
+        }
 
         #region[UI Helpers]
+
+        private void CreateUI()
+        {
+            if (canvas == null)
+            {
+                log.LogMessage(" ");
+                log.LogMessage("Creating UI Elements");
+
+                // Create a GameObject with a Canvas
+                canvas = instance.createUICanvas();
+                Object.DontDestroyOnLoad(canvas);
+
+                // Add a Panel to the Canvas. See createUIPanel for why we pass height/width as string
+                uiPanel = instance.createUIPanel(canvas, "550", "200", null);
+
+                // This is how we'll hook mouse Events for window dragging
+                uiPanel.AddComponent<EventTrigger>();
+                uiPanel.AddComponent<WindowDragHandler>();
+
+                Image panelImage = uiPanel.GetComponent<Image>();
+                panelImage.color = instance.HTMLString2Color("#2D2D30FF").Unbox<Color32>();
+
+                #region[Panel Elements]
+
+                // NOTE: Elements are spaced in increments/decrements of 35 in localPosition 
+
+                #region[Add a Button]
+
+                Sprite btnSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900FF"));
+                GameObject uiButton = instance.createUIButton(uiPanel, btnSprite);
+                uiButton.GetComponent<RectTransform>().localPosition = new Vector3(0, 250, 0);
+
+                #endregion
+
+                #region[Add a Toggle]
+
+                Sprite toggleBgSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#3E3E42FF"));
+                Sprite toggleSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900FF"));
+                GameObject uiToggle = instance.createUIToggle(uiPanel, toggleBgSprite, toggleSprite);
+                uiToggle.GetComponentInChildren<Text>().color = Color.white;
+                uiToggle.GetComponentInChildren<Toggle>().isOn = false;
+                uiToggle.GetComponent<RectTransform>().localPosition = new Vector3(0, 215, 0);
+
+                #endregion
+
+                #region[Add a Slider]
+
+                Sprite sliderBgSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#9E9E9EFF"));
+                Sprite sliderFillSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900FF"));
+                Sprite sliderKnobSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#191919FF"));
+                GameObject uiSlider = instance.createUISlider(uiPanel, sliderBgSprite, sliderFillSprite, sliderKnobSprite);
+                uiSlider.GetComponentInChildren<Slider>().value = 0.5f;
+                uiSlider.GetComponent<RectTransform>().localPosition = new Vector3(0, 185, 0);
+
+                #endregion
+
+                #region[Add a Text (Label)]
+
+                Sprite txtBgSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900FF"));
+                GameObject uiText = instance.createUIText(uiPanel, txtBgSprite, "#FFFFFFFF");
+                uiText.GetComponent<Text>().text = "This is a new Text Label";
+                uiText.GetComponent<RectTransform>().localPosition = new Vector3(0, 150, 0);
+
+                #endregion
+
+                #region[Add a InputField]
+
+                Sprite inputFieldSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900FF"));
+                GameObject uiInputField = instance.createUIInputField(uiPanel, inputFieldSprite, "#000000FF");
+                #region[Dev Note]
+                // The following line is odd. It sets the text but doesn't display it, WTF? The default child object PlaceHolder 
+                // has Text component but Unhollower thinks it's a UnityEngine.Graphic?
+                //      uiInputField.transform.GetChild(0).gameObject.GetComponent<Text>().text = "Search...";
+                // Checked in Unity Editor too, it's definately Text, why does unhollower think it's Graphic?
+                // 
+                // We'll just use the InputField component directly. It works, but PlaceHolder is nice...
+                #endregion
+                uiInputField.GetComponent<InputField>().text = "Some Input Field...";
+                uiInputField.GetComponent<RectTransform>().localPosition = new Vector3(0, 115, 0);
+
+                #endregion
+
+                #region[Add a DropDown]
+
+                // NOTE: This wierd, it does it's thing and work's but then the rest on the UI disappears... hmmm... :/
+
+                Sprite dropdownBgSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900FF"));
+                Sprite dropdownScrollbarSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#3E3E42FF"));
+                Sprite dropdownDropDownSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#252526FF"));
+                Sprite dropdownCheckmarkSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#7AB900FF"));
+                Sprite dropdownMaskSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#1E1E1EFF"));
+                GameObject uiDropDown = instance.createUIDropDown(uiPanel, dropdownBgSprite, dropdownScrollbarSprite, dropdownDropDownSprite, dropdownCheckmarkSprite, dropdownMaskSprite);
+                Object.DontDestroyOnLoad(uiDropDown);
+                uiDropDown.GetComponent<RectTransform>().localPosition = new Vector3(0, 75, 0);
+
+                #endregion
+
+                #region[Add a ScrollView]
+
+                Sprite scrollviewBgSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#9E9E9EFF"));
+                Sprite scrollviewScrollbarSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#3E3E42FF"));
+                Sprite scrollviewMaskSprite = instance.createSpriteFrmTexture(instance.createDefaultTexture("#3E3E42FF"));
+                GameObject uiScrollView = instance.createUIScrollView(uiPanel, scrollviewBgSprite, scrollviewMaskSprite, scrollviewScrollbarSprite);
+
+                // Set some content
+                GameObject content = uiScrollView.GetComponent<ScrollRect>().content.gameObject;
+                GameObject contentTextObj = instance.createUIText(content, scrollviewBgSprite, "#FFFFFFFF");
+                contentTextObj.GetComponent<Text>().text = "ScrollView Element";
+                contentTextObj.GetComponent<RectTransform>().localPosition = new Vector3(120, -50, 0);
+
+                uiScrollView.GetComponent<RectTransform>().localPosition = new Vector3(0, -75, 0);
+
+                #endregion
+
+                #region[Add a RawImage]
+
+                // Our Test Sprite for UI RawImage Element
+                log.LogMessage("      Trying to Load Test Sprite...");
+                stompy = testAssetBundle.LoadAsset<Sprite>("assets/tools/customassets/test assets/externaltexture.png");
+                if (stompy != null) { log.LogMessage("      Sprite Loaded!"); } else { log.LogMessage("      Failed to Load Sprite!"); }
+
+                GameObject uiImage = instance.createUIRawImage(uiPanel, stompy);
+                uiImage.GetComponent<RectTransform>().localPosition = new Vector3(0, -220, 0);
+                uiImage.GetComponent<RectTransform>().localScale = new Vector3(0.3f, 0.3f);
+
+                #endregion
+
+                #endregion
+
+                isVisible = true;
+
+                log.LogMessage("Complete!");
+            }
+        }
 
         public Il2CppSystem.Object HTMLString2Color(Il2CppSystem.String htmlcolorstring)
         {
@@ -431,17 +655,18 @@ namespace Trainer
 
         public GameObject createUICanvas()
         {
-            log.LogMessage("Creating Canvas");
+            log.LogMessage("   Creating Canvas");
 
             // Create a new Canvas Object with required components
             GameObject CanvasGO = new GameObject("CanvasGO");
             Canvas canvas = CanvasGO.AddComponent<Canvas>();
+            Object.DontDestroyOnLoad(CanvasGO);
             canvas.renderMode = RenderMode.ScreenSpaceCamera;
 
             UnityEngine.UI.CanvasScaler cs = CanvasGO.AddComponent<UnityEngine.UI.CanvasScaler>();
             cs.screenMatchMode = UnityEngine.UI.CanvasScaler.ScreenMatchMode.Expand;
             cs.referencePixelsPerUnit = 100f;
-            cs.referenceResolution = new Vector2(800f, 600f);
+            cs.referenceResolution = new Vector2(1024f, 788f);
 
             UnityEngine.UI.GraphicRaycaster gr = CanvasGO.AddComponent<UnityEngine.UI.GraphicRaycaster>();
 
@@ -454,7 +679,7 @@ namespace Trainer
 
             uiResources.background = BgSprite;
 
-            log.LogMessage("Creating UI Panel");
+            log.LogMessage("   Creating UI Panel");
             GameObject uiPanel = UIControls.CreatePanel(uiResources);
             uiPanel.transform.SetParent(canvas.transform, false);
 
@@ -476,7 +701,7 @@ namespace Trainer
 
             uiResources.standard = NewSprite;
 
-            log.LogMessage("Creating UI Button");
+            log.LogMessage("   Creating UI Button");
             GameObject uiButton = UIControls.CreateButton(uiResources);
             uiButton.transform.SetParent(parent.transform, false);
 
@@ -490,7 +715,7 @@ namespace Trainer
             uiResources.standard = BgSprite;
             uiResources.checkmark = customCheckmarkSprite;
 
-            log.LogMessage("Creating UI Toggle");
+            log.LogMessage("   Creating UI Toggle");
             GameObject uiToggle = UIControls.CreateToggle(uiResources);
             uiToggle.transform.SetParent(parent.transform, false);
 
@@ -505,7 +730,7 @@ namespace Trainer
             uiResources.standard = FillSprite;
             uiResources.knob = KnobSprite;
 
-            log.LogMessage("Creating UI Slider");
+            log.LogMessage("   Creating UI Slider");
             GameObject uiSlider = UIControls.CreateSlider(uiResources);
             uiSlider.transform.SetParent(parent.transform, false);
 
@@ -518,7 +743,7 @@ namespace Trainer
 
             uiResources.inputField = BgSprite;
 
-            log.LogMessage("Creating UI InputField");
+            log.LogMessage("   Creating UI InputField");
             GameObject uiInputField = UIControls.CreateInputField(uiResources);
             uiInputField.transform.SetParent(parent.transform, false);
 
@@ -546,7 +771,7 @@ namespace Trainer
             // Set the Viewport Mask
             uiResources.mask = customMaskSprite;
 
-            log.LogMessage("Creating UI DropDown");
+            log.LogMessage("   Creating UI DropDown");
             var uiDropdown = UIControls.CreateDropdown(uiResources);
             uiDropdown.transform.SetParent(parent.transform, false);
 
@@ -559,7 +784,7 @@ namespace Trainer
 
             uiResources.background = BgSprite;
 
-            log.LogMessage("Creating UI Image");
+            log.LogMessage("   Creating UI Image");
             GameObject uiImage = UIControls.CreateImage(uiResources);
             uiImage.transform.SetParent(parent.transform, false);
 
@@ -572,7 +797,7 @@ namespace Trainer
 
             uiResources.background = BgSprite;
 
-            log.LogMessage("Creating UI RawImage");
+            log.LogMessage("   Creating UI RawImage");
             GameObject uiRawImage = UIControls.CreateRawImage(uiResources);
             uiRawImage.transform.SetParent(parent.transform, false);
 
@@ -585,7 +810,7 @@ namespace Trainer
 
             uiResources.background = ScrollbarSprite;
 
-            log.LogMessage("Creating UI Scrollbar");
+            log.LogMessage("   Creating UI Scrollbar");
             GameObject uiScrollbar = UIControls.CreateScrollbar(uiResources);
             uiScrollbar.transform.SetParent(parent.transform, false);
 
@@ -603,7 +828,7 @@ namespace Trainer
             uiResources.standard = customScrollbarSprite;
             uiResources.mask = customMaskSprite;
 
-            log.LogMessage("Creating UI ScrollView");
+            log.LogMessage("   Creating UI ScrollView");
             GameObject uiScrollView = UIControls.CreateScrollView(uiResources);
             uiScrollView.transform.SetParent(parent.transform, false);
 
@@ -616,7 +841,7 @@ namespace Trainer
 
             uiResources.background = BgSprite;
 
-            log.LogMessage("Creating UI Text");
+            log.LogMessage("   Creating UI Text");
             GameObject uiText = UIControls.CreateText(uiResources);
             uiText.transform.SetParent(parent.transform, false);
 
@@ -630,6 +855,8 @@ namespace Trainer
         #endregion
 
         #region[ICalls]
+
+        #region[Get Objects]
 
         // Resolve the GetRootGameObjects ICall (internal Unity MethodImp functions)
         internal static getRootSceneObjects getRootSceneObjects_iCall = IL2CPP.ResolveICall<getRootSceneObjects>("UnityEngine.SceneManagement.Scene::GetRootGameObjectsInternal");
@@ -647,7 +874,6 @@ namespace Trainer
 
             return list;
         }
-
         private static Il2CppSystem.Collections.Generic.List<GameObject> GetAllScenesGameObjects()
         {
             Scene[] array = new Scene[SceneManager.sceneCount];
@@ -664,8 +890,20 @@ namespace Trainer
                 foreach (var obj in list) { allObjectsList.Add(obj); }
             }
 
+            #region[DevNote]
+            /*
+            The reason these differ are that GetAllScenesObjects doen't get DontDestroyOnLoad objects and it maintains heirarchy so it looks like alot less
+            For example: GetAllScenesObjects() doesn't find this Trainer and the games StageLoadManager object.
+            */
+            //log.LogMessage("AllScenesObject's Count: " + allObjectsList.Count.ToString());
+            //log.LogMessage("FindAll<GameObject>() Count: " + GameObject.FindObjectsOfType<GameObject>().Count.ToString());
+            #endregion
+
             return allObjectsList;
         }
+
+        #endregion
+
 
         #endregion
 
@@ -706,6 +944,7 @@ namespace Trainer
                 // Dump the children
                 DisplayChildren(obj.transform);
 
+                // Write the Dump File
                 if (dumpLog != "")
                 {
                     if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "\\OBJECT_DUMPS\\")) { Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + "\\OBJECT_DUMPS\\"); }

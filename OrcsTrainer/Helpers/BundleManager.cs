@@ -213,7 +213,6 @@ namespace UnityEngine
         public T Load<T>(string name) where T : Object => LoadAsset<T>(name);
         public T LoadAsset<T>(string name) where T : Object
         {
-
             if (!Il2CppTypeSupport.IsGeneratedAssemblyType(typeof(T)))
                 throw new System.NullReferenceException("The type must be a Generated Assembly Type.");
             System.IntPtr intptr = LoadAsset(name, Il2CppType.Of<T>().Pointer);
@@ -238,6 +237,7 @@ namespace UnityEngine
                 throw new System.NullReferenceException("The input type cannot be IntPtr.Zero");
             if (LoadAsset_InternalDelegateField == null)
                 throw new System.NullReferenceException("The LoadAsset_InternalDelegateField cannot be null.");
+            
             return LoadAsset_InternalDelegateField(bundleptr, IL2CPP.ManagedStringToIl2Cpp(name), typeptr);
         }
 

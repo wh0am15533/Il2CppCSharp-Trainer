@@ -24,7 +24,7 @@ namespace Trainer
             GetIl2CppMethodInfoPointerFieldForGeneratedMethod = UnhollowerBaseLib.GetType("UnhollowerBaseLib.UnhollowerUtils").GetMethod("GetIl2CppMethodInfoPointerFieldForGeneratedMethod");
         }
 
-        public static bool IsGeneratedAssemblyType(Type type) => (!Il2CppObjectBaseType.Equals(null) && !type.Equals(null) && type.IsSubclassOf(Il2CppObjectBaseType));
+        public static bool IsGeneratedAssemblyType(Type type) => (!UnhollowerBaseLib.Equals(null) && !Il2CppObjectBaseType.Equals(null) && !type.Equals(null) && type.IsSubclassOf(Il2CppObjectBaseType));
 
         public static IntPtr MethodBaseToIl2CppMethodInfoPointer(MethodBase method)
         {
