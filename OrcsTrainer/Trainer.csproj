@@ -62,10 +62,6 @@
       <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\core\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="BepInEx.Core">
       <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\core\BepInEx.Core.dll</HintPath>
       <Private>False</Private>
@@ -104,10 +100,6 @@
     </Reference>
     <Reference Include="Mono.Cecil.Rocks, Version=0.11.2.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
       <HintPath>..\packages\Mono.Cecil.0.11.2\lib\net40\Mono.Cecil.Rocks.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Sirenix.Serialization">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\Sirenix.Serialization.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -159,13 +151,12 @@
   <ItemGroup>
     <Compile Include="BepInExLoader.cs" />
     <Compile Include="Bootstrapper.cs" />
-    <Compile Include="GameObjectDetails.cs" />
+    <Compile Include="Helpers\GameObjectDetails.cs" />
     <Compile Include="Helpers\BundleManager.cs" />
     <Compile Include="Helpers\ICallHelper.cs" />
     <Compile Include="Helpers\Il2CppTypeSupport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\SceneDumper.cs" />
-    <None Include="UI\TooltipUI.cs" />
     <Compile Include="Tools\EventTestComponent.cs" />
     <Compile Include="UI\TooltipGUI.cs" />
     <Compile Include="TrainerComponent.cs" />

@@ -27,13 +27,16 @@ namespace UnityEngine
         {
             if (GetAllLoadedAssetBundles_NativeDelegateField == null)
                 throw new System.NullReferenceException("The GetAllLoadedAssetBundles_NativeDelegateField cannot be null.");
+
             System.IntPtr intPtr = GetAllLoadedAssetBundles_NativeDelegateField();
             Il2CppReferenceArray<Object> refarr = ((intPtr != System.IntPtr.Zero) ? new Il2CppReferenceArray<Object>(intPtr) : null);
             if (refarr == null)
                 throw new System.NullReferenceException("The refarr cannot be null.");
+
             System.Collections.Generic.List<Il2CppAssetBundle> bundlelist = new System.Collections.Generic.List<Il2CppAssetBundle>();
             for (int i = 0; i < refarr.Length; i++)
                 bundlelist.Add(new Il2CppAssetBundle(IL2CPP.Il2CppObjectBaseToPtrNotNull(refarr[i])));
+
             return bundlelist.ToArray();
         }
 
@@ -43,9 +46,12 @@ namespace UnityEngine
         {
             if (string.IsNullOrEmpty(path))
                 throw new System.ArgumentException("The input asset bundle path cannot be null or empty.");
+
             if (LoadFromFile_InternalDelegateField == null)
                 throw new System.NullReferenceException("The LoadFromFile_InternalDelegateField cannot be null.");
+
             System.IntPtr intPtr = LoadFromFile_InternalDelegateField(IL2CPP.ManagedStringToIl2Cpp(path), crc, offset);
+
             return ((intPtr != System.IntPtr.Zero) ? new Il2CppAssetBundle(intPtr) : null);
         }
 
@@ -55,9 +61,12 @@ namespace UnityEngine
         {
             if (string.IsNullOrEmpty(path))
                 throw new System.ArgumentException("The input asset bundle path cannot be null or empty.");
+
             if (LoadFromFileAsync_InternalDelegateField == null)
                 throw new System.NullReferenceException("The LoadFromFileAsync_InternalDelegateField cannot be null.");
+
             System.IntPtr intPtr = LoadFromFileAsync_InternalDelegateField(IL2CPP.ManagedStringToIl2Cpp(path), crc, offset);
+
             return ((intPtr != System.IntPtr.Zero) ? new AssetBundleCreateRequest(intPtr) : null);
         }
 
@@ -66,9 +75,12 @@ namespace UnityEngine
         {
             if (binary == null)
                 throw new System.ArgumentException("The binary cannot be null or empty.");
+
             if (LoadFromMemory_InternalDelegateField == null)
                 throw new System.NullReferenceException("The LoadFromMemory_InternalDelegateField cannot be null.");
+
             System.IntPtr intPtr = LoadFromMemory_InternalDelegateField(IL2CPP.Il2CppObjectBaseToPtrNotNull(binary), crc);
+
             return ((intPtr != System.IntPtr.Zero) ? new Il2CppAssetBundle(intPtr) : null);
         }
 
@@ -77,9 +89,12 @@ namespace UnityEngine
         {
             if (binary == null)
                 throw new System.ArgumentException("The binary cannot be null or empty.");
+
             if (LoadFromMemoryAsync_InternalDelegateField == null)
                 throw new System.NullReferenceException("The LoadFromMemoryAsync_InternalDelegateField cannot be null.");
+
             System.IntPtr intPtr = LoadFromMemoryAsync_InternalDelegateField(IL2CPP.Il2CppObjectBaseToPtrNotNull(binary), crc);
+
             return ((intPtr != System.IntPtr.Zero) ? new AssetBundleCreateRequest(intPtr) : null);
         }
 
@@ -89,9 +104,12 @@ namespace UnityEngine
         {
             if (stream == null)
                 throw new System.ArgumentException("The stream cannot be null or empty.");
+
             if (LoadFromStreamInternalDelegateField == null)
                 throw new System.NullReferenceException("The LoadFromStreamInternalDelegateField cannot be null.");
+
             System.IntPtr intPtr = LoadFromStreamInternalDelegateField(IL2CPP.Il2CppObjectBaseToPtrNotNull(stream), crc, managedReadBufferSize);
+
             return ((intPtr != System.IntPtr.Zero) ? new Il2CppAssetBundle(intPtr) : null);
         }
 
@@ -101,9 +119,12 @@ namespace UnityEngine
         {
             if (stream == null)
                 throw new System.ArgumentException("The stream cannot be null or empty.");
+
             if (LoadFromStreamAsyncInternalDelegateField == null)
                 throw new System.NullReferenceException("The LoadFromStreamAsyncInternalDelegateField cannot be null.");
+
             System.IntPtr intPtr = LoadFromStreamAsyncInternalDelegateField(IL2CPP.Il2CppObjectBaseToPtrNotNull(stream), crc, managedReadBufferSize);
+
             return ((intPtr != System.IntPtr.Zero) ? new AssetBundleCreateRequest(intPtr) : null);
         }
 
@@ -111,6 +132,7 @@ namespace UnityEngine
         {
             if (UnloadAllAssetBundlesDelegateField == null)
                 throw new System.NullReferenceException("The UnloadAllAssetBundlesDelegateField cannot be null.");
+
             UnloadAllAssetBundlesDelegateField(unloadAllObjects);
         }
 
@@ -136,6 +158,7 @@ namespace UnityEngine
     {
         private System.IntPtr bundleptr = System.IntPtr.Zero;
         public Il2CppAssetBundle(System.IntPtr ptr) { bundleptr = ptr; }
+
         static Il2CppAssetBundle()
         {
             get_isStreamedSceneAssetBundleDelegateField = IL2CPP.ResolveICall<get_isStreamedSceneAssetBundleDelegate>("UnityEngine.AssetBundle::get_isStreamedSceneAssetBundle");
@@ -156,8 +179,10 @@ namespace UnityEngine
             {
                 if (bundleptr == System.IntPtr.Zero)
                     throw new System.NullReferenceException("The bundleptr cannot be IntPtr.Zero");
+
                 if (get_isStreamedSceneAssetBundleDelegateField == null)
                     throw new System.NullReferenceException("The get_isStreamedSceneAssetBundleDelegateField cannot be null.");
+
                 return get_isStreamedSceneAssetBundleDelegateField(bundleptr);
             }
         }
@@ -168,9 +193,12 @@ namespace UnityEngine
             {
                 if (bundleptr == System.IntPtr.Zero)
                     throw new System.NullReferenceException("The bundleptr cannot be IntPtr.Zero");
+
                 if (returnMainAssetDelegateField == null)
                     throw new System.NullReferenceException("The returnMainAssetDelegateField cannot be null.");
+
                 System.IntPtr intPtr = returnMainAssetDelegateField(bundleptr);
+
                 return ((intPtr != System.IntPtr.Zero) ? new Object(intPtr) : null);
             }
         }
@@ -179,10 +207,13 @@ namespace UnityEngine
         {
             if (bundleptr == System.IntPtr.Zero)
                 throw new System.NullReferenceException("The bundleptr cannot be IntPtr.Zero");
+
             if (string.IsNullOrEmpty(name))
                 throw new System.ArgumentException("The input asset name cannot be null or empty.");
+
             if (ContainsDelegateField == null)
                 throw new System.NullReferenceException("The ContainsDelegateField cannot be null.");
+
             return ContainsDelegateField(bundleptr, IL2CPP.ManagedStringToIl2Cpp(name));
         }
 
@@ -191,9 +222,12 @@ namespace UnityEngine
         {
             if (bundleptr == System.IntPtr.Zero)
                 throw new System.NullReferenceException("The bundleptr cannot be IntPtr.Zero");
+
             if (GetAllAssetNamesDelegateField == null)
                 throw new System.NullReferenceException("The GetAllAssetNamesDelegateField cannot be null.");
+
             System.IntPtr intPtr = GetAllAssetNamesDelegateField(bundleptr);
+
             return ((intPtr != System.IntPtr.Zero) ? new Il2CppStringArray(intPtr) : null);
         }
 
@@ -202,9 +236,12 @@ namespace UnityEngine
         {
             if (bundleptr == System.IntPtr.Zero)
                 throw new System.NullReferenceException("The bundleptr cannot be IntPtr.Zero");
+
             if (GetAllScenePathsDelegateField == null)
                 throw new System.NullReferenceException("The GetAllScenePathsDelegateField cannot be null.");
+
             System.IntPtr intPtr = GetAllScenePathsDelegateField(bundleptr);
+
             return ((intPtr != System.IntPtr.Zero) ? new Il2CppStringArray(intPtr) : null);
         }
 
@@ -215,7 +252,9 @@ namespace UnityEngine
         {
             if (!Il2CppTypeSupport.IsGeneratedAssemblyType(typeof(T)))
                 throw new System.NullReferenceException("The type must be a Generated Assembly Type.");
+
             System.IntPtr intptr = LoadAsset(name, Il2CppType.Of<T>().Pointer);
+
             return ((intptr != System.IntPtr.Zero) ? Il2CppTypeSupport.Il2CppObjectPtrToIl2CppObject<T>(intptr) : null);
         }
         public Object Load(string name, Il2CppSystem.Type type) => LoadAsset(name, type);
@@ -223,7 +262,9 @@ namespace UnityEngine
         {
             if (type == null)
                 throw new System.NullReferenceException("The input type cannot be null.");
+
             System.IntPtr intptr = LoadAsset(name, type.Pointer);
+
             return ((intptr != System.IntPtr.Zero) ? new Object(intptr) : null);
         }
         public System.IntPtr Load(string name, System.IntPtr typeptr) => LoadAsset(name, typeptr);
@@ -231,10 +272,13 @@ namespace UnityEngine
         {
             if (bundleptr == System.IntPtr.Zero)
                 throw new System.NullReferenceException("The bundleptr cannot be IntPtr.Zero");
+
             if (string.IsNullOrEmpty(name))
                 throw new System.ArgumentException("The input asset name cannot be null or empty.");
+
             if (typeptr == System.IntPtr.Zero)
                 throw new System.NullReferenceException("The input type cannot be IntPtr.Zero");
+
             if (LoadAsset_InternalDelegateField == null)
                 throw new System.NullReferenceException("The LoadAsset_InternalDelegateField cannot be null.");
             
@@ -246,26 +290,34 @@ namespace UnityEngine
         {
             if (!Il2CppTypeSupport.IsGeneratedAssemblyType(typeof(T)))
                 throw new System.NullReferenceException("The type must be a Generated Assembly Type.");
+
             System.IntPtr intptr = LoadAssetAsync(name, Il2CppType.Of<T>().Pointer);
+
             return ((intptr != System.IntPtr.Zero) ? new AssetBundleCreateRequest(intptr) : null);
         }
         public AssetBundleCreateRequest LoadAssetAsync(string name, Il2CppSystem.Type type)
         {
             if (type == null)
                 throw new System.NullReferenceException("The input type cannot be null.");
+
             System.IntPtr intptr = LoadAssetAsync(name, type.Pointer);
+
             return ((intptr != System.IntPtr.Zero) ? new AssetBundleCreateRequest(intptr) : null);
         }
         public System.IntPtr LoadAssetAsync(string name, System.IntPtr typeptr)
         {
             if (bundleptr == System.IntPtr.Zero)
                 throw new System.NullReferenceException("The bundleptr cannot be IntPtr.Zero");
+
             if (string.IsNullOrEmpty(name))
                 throw new System.ArgumentException("The input asset name cannot be null or empty.");
+
             if (typeptr == System.IntPtr.Zero)
                 throw new System.NullReferenceException("The input type cannot be IntPtr.Zero");
+
             if (LoadAssetAsync_InternalDelegateField == null)
                 throw new System.NullReferenceException("The LoadAssetAsync_InternalDelegateField cannot be null.");
+
             return LoadAssetAsync_InternalDelegateField(bundleptr, IL2CPP.ManagedStringToIl2Cpp(name), typeptr);
         }
 
@@ -276,7 +328,9 @@ namespace UnityEngine
         {
             if (!Il2CppTypeSupport.IsGeneratedAssemblyType(typeof(T)))
                 throw new System.NullReferenceException("The type must be a Generated Assembly Type.");
+
             System.IntPtr intptr = LoadAllAssets(Il2CppType.Of<T>().Pointer);
+
             return ((intptr != System.IntPtr.Zero) ? new Il2CppReferenceArray<T>(intptr) : null);
         }
         public Il2CppReferenceArray<Object> LoadAll(Il2CppSystem.Type type) => LoadAllAssets(type);
@@ -284,7 +338,9 @@ namespace UnityEngine
         {
             if (type == null)
                 throw new System.NullReferenceException("The input type cannot be null.");
+
             System.IntPtr intptr = LoadAllAssets(type.Pointer);
+
             return ((intptr != System.IntPtr.Zero) ? new Il2CppReferenceArray<Object>(intptr) : null);
         }
         public System.IntPtr LoadAll(System.IntPtr typeptr) => LoadAllAssets(typeptr);
@@ -294,26 +350,34 @@ namespace UnityEngine
         {
             if (!Il2CppTypeSupport.IsGeneratedAssemblyType(typeof(T)))
                 throw new System.NullReferenceException("The type must be a Generated Assembly Type.");
+
             System.IntPtr intptr = LoadAssetWithSubAssets(name, Il2CppType.Of<T>().Pointer);
+
             return ((intptr != System.IntPtr.Zero) ? new Il2CppReferenceArray<T>(intptr) : null);
         }
         public Il2CppReferenceArray<Object> LoadAssetWithSubAssets(string name, Il2CppSystem.Type type)
         {
             if (type == null)
                 throw new System.NullReferenceException("The input type cannot be null.");
+
             System.IntPtr intptr = LoadAssetWithSubAssets(name, type.Pointer);
+
             return ((intptr != System.IntPtr.Zero) ? new Il2CppReferenceArray<Object>(intptr) : null);
         }
         public System.IntPtr LoadAssetWithSubAssets(string name, System.IntPtr typeptr)
         {
             if (bundleptr == System.IntPtr.Zero)
                 throw new System.NullReferenceException("The bundleptr cannot be IntPtr.Zero");
+
             if (string.IsNullOrEmpty(name))
                 throw new System.ArgumentException("The input asset name cannot be null or empty.");
+
             if (typeptr == System.IntPtr.Zero)
                 throw new System.NullReferenceException("The input type cannot be IntPtr.Zero");
+
             if (LoadAssetWithSubAssets_InternalDelegateField == null)
                 throw new System.NullReferenceException("The LoadAssetWithSubAssets_InternalDelegateField cannot be null.");
+
             return LoadAssetWithSubAssets_InternalDelegateField(bundleptr, IL2CPP.ManagedStringToIl2Cpp(name), typeptr);
         }
 
@@ -322,26 +386,34 @@ namespace UnityEngine
         {
             if (!Il2CppTypeSupport.IsGeneratedAssemblyType(typeof(T)))
                 throw new System.NullReferenceException("The type must be a Generated Assembly Type.");
+
             System.IntPtr intptr = LoadAssetWithSubAssetsAsync(name, Il2CppType.Of<T>().Pointer);
+
             return ((intptr != System.IntPtr.Zero) ? new AssetBundleCreateRequest(intptr) : null);
         }
         public AssetBundleCreateRequest LoadAssetWithSubAssetsAsync(string name, Il2CppSystem.Type type)
         {
             if (type == null)
                 throw new System.NullReferenceException("The input type cannot be null.");
+
             System.IntPtr intptr = LoadAssetWithSubAssetsAsync(name, type.Pointer);
+
             return ((intptr != System.IntPtr.Zero) ? new AssetBundleCreateRequest(intptr) : null);
         }
         public System.IntPtr LoadAssetWithSubAssetsAsync(string name, System.IntPtr typeptr)
         {
             if (bundleptr == System.IntPtr.Zero)
                 throw new System.NullReferenceException("The bundleptr cannot be IntPtr.Zero");
+
             if (string.IsNullOrEmpty(name))
                 throw new System.ArgumentException("The input asset name cannot be null or empty.");
+
             if (typeptr == System.IntPtr.Zero)
                 throw new System.NullReferenceException("The input type cannot be IntPtr.Zero");
+
             if (LoadAssetWithSubAssetsAsync_InternalDelegateField == null)
                 throw new System.NullReferenceException("The LoadAssetWithSubAssetsAsync_InternalDelegateField cannot be null.");
+
             return LoadAssetWithSubAssetsAsync_InternalDelegateField(bundleptr, IL2CPP.ManagedStringToIl2Cpp(name), typeptr);
         }
 
@@ -349,8 +421,10 @@ namespace UnityEngine
         {
             if (bundleptr == System.IntPtr.Zero)
                 throw new System.NullReferenceException("The bundleptr cannot be IntPtr.Zero");
+
             if (UnloadDelegateField == null)
                 throw new System.NullReferenceException("The UnloadDelegateField cannot be null.");
+
             UnloadDelegateField(bundleptr, unloadAllLoadedObjects);
         }
 

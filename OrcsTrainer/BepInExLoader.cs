@@ -22,7 +22,6 @@ namespace Trainer
             VERSION = "1.0.0.0";
         
         public static BepInEx.Logging.ManualLogSource log;
-        public static Action t = null;
 
         #endregion
 
@@ -89,7 +88,7 @@ namespace Trainer
 
                 #region[IBeginDragHandler, IDragHandler, IEndDragHandler Hooks]
                 
-                // These are required since UnHollower doesn't support Interfaces yet
+                // These are required since UnHollower doesn't support Interfaces yet - Only needed if you need these events.
 
                 // IBeginDragHandler
                 var originalOnBeginDrag = AccessTools.Method(typeof(UnityEngine.EventSystems.EventTrigger), "OnBeginDrag");
@@ -135,7 +134,6 @@ namespace Trainer
             Bootstrapper.Create("BootStrapperGO");
 
             #endregion
-
         }        
     }
 }
