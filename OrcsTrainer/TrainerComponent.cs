@@ -40,6 +40,11 @@ namespace Trainer
         private static Il2CppAssetBundle testAssetBundle = null;
         private static GameObject eventsTester = null;
         private static TooltipGUI toolTipComp = null;
+        private static IntPtr renderUIPointer = IntPtr.Zero;
+
+        // IMGUI
+        private static Rect MainWindow;
+        private static bool MainWindowVisible = true;
 
         // UI
         private static GameObject canvas = null;
@@ -91,7 +96,14 @@ namespace Trainer
 
         private static void Initialize()
         {
-            #region[AssetBundle Loading]
+            // Get the RenderUI Pointer for use with IMGUI Window
+            if (renderUIPointer == IntPtr.Zero)
+            {
+                MethodInfo renderUIMeth = typeof(TrainerComponent).GetMethod("RenderUI", BindingFlags.Default | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+                if (renderUIMeth != null) { renderUIPointer = renderUIMeth.MethodHandle.GetFunctionPointer(); log.LogMessage("RenderUI Pointer: 0x" + renderUIPointer.ToString("X8")); } else { log.LogError("RenderUI Pointer is NULL!"); }
+            }
+
+            #region[AssetBundle Loading - Put the AssetBundles folder in the Game root folder!]
 
             if (testAssetBundle == null)
             {
@@ -177,6 +189,8 @@ namespace Trainer
         public void Start()
         {
             log.LogMessage("TrainerComponent Start() Fired!");
+
+            MainWindow = new Rect(Screen.width / 2 - 100, Screen.height / 2 - 250, 250f, 50f);
         }
 
         public void Update()
@@ -479,6 +493,26 @@ namespace Trainer
         public void OnGUI()
         {
             if (!onGuiFired) { BepInExLoader.log.LogMessage("TrainerComponent OnGUI() Fired!"); onGuiFired = true; }
+
+            if (!MainWindowVisible)
+                return;
+
+            if (Event.current.type == EventType.Layout)
+            {
+                GUI.backgroundColor = Color.black;
+                GUIStyle titleStyle = new GUIStyle(GUI.skin.window);
+                titleStyle.normal.textColor = Color.green;
+
+                //MAIN WINDOW - Testing due to Stripping
+                MainWindow = new Rect(MainWindow.x, MainWindow.y, 250f, 50f);
+                //MainWindow = GUILayout.Window(0, MainWindow, new GUI.WindowFunction(renderUIPointer), "Unity IL2CPP Testing", titleStyle, new GUILayoutOption[0]); 
+                
+            }
+        }
+
+        public static void RenderUI(int id)
+        {
+
         }
 
         public void OnEnable()
