@@ -160,7 +160,7 @@ namespace Trainer
             log.LogMessage("   S = Display Scene Details");
             log.LogMessage("   U = Test Creating UI Elements");
             log.LogMessage("   X = Dump Objects to XML (w/ optionToggle uses FindObjectsOfType<>() (Finds more, but loss of Hierarchy)");
-            log.LogMessage("   T = Toggle Tooltip w/ optionToggle");
+            log.LogMessage("   T = Toggle GUI GameObject Tooltip w/ optionToggle (Drag mouse around while holding down mouse button)");
             log.LogMessage("   Tab = Test Unity MonoBehavior Events");
             log.LogMessage(" ");
 
