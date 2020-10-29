@@ -1,7 +1,10 @@
-# Il2CppCSharp-Trainer
+# Il2CppCSharp-Trainer Framework Only
 Example on how to implement a C# mod in a Il2Cpp game and injecting a custom Type during runtime into the Il2Cpp Domain, using the preview version 6.0 of BepInEx and Doorstop. New things being added regularly so check back often. this project aims to be a compendium of techniques/usage for the new IL2CPP system from Doorstop/BepInEx/UnHollower.
 
-# Game
+# NOTE:
+This branch includes only the framework code. Be sure to place the 'AssetBundles' folder into your game's root folder if you want to test the assetbundle functionality.
+
+# Example Game
 Orc's Civil War
 
 #### See Here for Details:
