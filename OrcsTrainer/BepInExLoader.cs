@@ -4,9 +4,9 @@ using BepInEx;
 using UnhollowerRuntimeLib;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Object = UnityEngine.Object;
 using Trainer.UI;
-using UnityEngine.EventSystems;
 
 namespace Trainer
 {
@@ -22,92 +22,74 @@ namespace Trainer
             VERSION = "1.0.0.0";
         
         public static BepInEx.Logging.ManualLogSource log;
-
-        public static TooltipGUI tooltip = null;
-
         public static Action t = null;
 
         #endregion
 
         public BepInExLoader()
         {
+            AppDomain.CurrentDomain.UnhandledException += ExceptionHandler;
             Application.runInBackground = true;
-
             log = Log;
         }
+
+        private static void ExceptionHandler(object sender, UnhandledExceptionEventArgs e) => log.LogError("\r\n\r\nUnhandled Exception:" + (e.ExceptionObject as Exception).ToString());
 
         public override void Load()
         {
             #region[Register TrainerComponent in Il2Cpp]
 
-            log.LogMessage("Registering Custom MonoBehaviors in Il2Cpp");
+            log.LogMessage("Registering C# Type's in Il2Cpp");
 
             try
             {
-                // Register our custom Types in Il2Cpp
+                // Trainer
+                ClassInjector.RegisterTypeInIl2Cpp<Bootstrapper>();
                 ClassInjector.RegisterTypeInIl2Cpp<TrainerComponent>();
+                
+                // UI
                 ClassInjector.RegisterTypeInIl2Cpp<UIControls>();
                 ClassInjector.RegisterTypeInIl2Cpp<WindowDragHandler>();
                 ClassInjector.RegisterTypeInIl2Cpp<TooltipGUI>();
+
+                // Debugging
+                ClassInjector.RegisterTypeInIl2Cpp<Trainer.Tools.EventTestComponent>();
+
             }
             catch
             {
-                log.LogError("FAILED to Register Il2Cpp Type: TrainerComponent!");
+                log.LogError("FAILED to Register Il2Cpp Type!");
             }
 
-            #endregion
-
-            #region[MonoMod Detour Testing]
-            //Invalid IL code error because of Unhollower. Try with Mono.Cecil Reflection instead of System.Reflection. I know Unhollower creates runable, but 
-            // executable assemblies, but if it can read it's own shit, why the error about it now??
-            /*
-            // Get Some MethodInfo's First
-            var originalOnGUId = AccessTools.Method(typeof(I2.Loc.RealTimeTranslation), "OnGUI");
-            var postOnGUId = AccessTools.Method(typeof(Trainer.UI.TooltipGUI), "OnGUI");
-
-            // Create Detour
-            log.LogMessage("Trying to Create OnGUI Detour...");
-            try
-            {
-                MonoMod.RuntimeDetour.Detour d = new MonoMod.RuntimeDetour.Detour(originalOnGUId, postOnGUId);
-                d.Apply();
-                t = d.GenerateTrampoline<Action>(); // ERROR: MonoMod Detour - Invalid IL
-            }
-            catch(Exception ex)
-            {
-                log.LogError("ERROR Applying Detour: " + ex.Message);
-            }
-            */
             #endregion
 
             #region[Harmony Patching]
 
             try
             {
+                log.LogMessage(" ");
                 log.LogMessage("Inserting Harmony Hooks...");
 
                 var harmony = new Harmony("wh0am15533.trainer.il2cpp");
 
-                #region[Primary Entry Hooks]
+                #region[Enable/Disable Harmony Debug Log]
+                //Harmony.DEBUG = true; (Old)
+                //HarmonyFileLog.Enabled = true;
+                #endregion
 
-                /// Use USplashScreen for Testing Update() Hook (Orc's Civil War) just to make sure it works,
-                /// then look for a Update() that always exist in the game. Here are some for Orc's:
-                ///     USplashScreen loads right away, then stops after splash screen video
-                ///     ObjRotation loads when you load a level
-                ///     DigitalRubyShared.FingersScript loads when you load a level
-                ///     mGameStudio.RTS.CameraController loads when you load a level
-                ///     UnityEngine.UI.CanvasScaler loads right away and stays loaded as long as the game has a Canvas object
-                ///
+                #region[Update() Hook - Only Needed for Bootstrapper]
 
                 var originalUpdate = AccessTools.Method(typeof(UnityEngine.UI.CanvasScaler), "Update");
                 log.LogMessage("   Original Method: " + originalUpdate.DeclaringType.Name + "." + originalUpdate.Name);
-                var postUpdate = AccessTools.Method(typeof(TrainerComponent), "Update");
+                var postUpdate = AccessTools.Method(typeof(Trainer.Bootstrapper), "Update");
                 log.LogMessage("   Postfix Method: " + postUpdate.DeclaringType.Name + "." + postUpdate.Name);
                 harmony.Patch(originalUpdate, postfix: new HarmonyMethod(postUpdate));
 
                 #endregion
 
                 #region[IBeginDragHandler, IDragHandler, IEndDragHandler Hooks]
+                
+                // These are required since UnHollower doesn't support Interfaces yet
 
                 // IBeginDragHandler
                 var originalOnBeginDrag = AccessTools.Method(typeof(UnityEngine.EventSystems.EventTrigger), "OnBeginDrag");
@@ -129,51 +111,31 @@ namespace Trainer
                 var postOnEndDrag = AccessTools.Method(typeof(WindowDragHandler), "OnEndDrag");
                 log.LogMessage("   Postfix Method: " + postOnEndDrag.DeclaringType.Name + "." + postOnEndDrag.Name);
                 harmony.Patch(originalOnEndDrag, postfix: new HarmonyMethod(postOnEndDrag));
-
-                #endregion
-
-                #region[OnGUI Hook]
-
-                // OnGUI can be the hardest event to find, it get's stripped often, after most of the OnGUI's you find will crash the game.
-                // In Orc's this is the only one that work's. See TrainerComponent->Initialize() for how we have to use it since the 
-                // game doesn't neve loads it. Another issue is that the one you hook will often have it's own OnGUI stuff, so you have to
-                // hide it or replace the method instead of just hooking it.
-                /*
-                var originalOnGUI = AccessTools.Method(typeof(I2.Loc.RealTimeTranslation), "OnGUI");
-                log.LogMessage("   Original Method: " + originalOnGUI.DeclaringType.Name + "." + originalOnGUI.Name);
-                var postOnGUI = AccessTools.Method(typeof(Trainer.UI.TooltipGUI), "OnGUI");
-                log.LogMessage("   Postfix Method: " + postOnGUI.DeclaringType.Name + "." + postOnGUI.Name);
-                harmony.Patch(originalOnGUI, postfix: new HarmonyMethod(postOnGUI));
-                */
+                
                 #endregion
 
                 log.LogMessage("Runtime Hooks's Applied");
-
+                log.LogMessage(" ");
             }
-            catch
-            {
-                log.LogError("FAILED to Apply Hooks's!");
-            }
+            catch { log.LogError("FAILED to Apply Hooks's!"); }
 
             #endregion
 
             log.LogMessage("Initializing Il2CppTypeSupport..."); // Helps with AssetBundles
             Il2CppTypeSupport.Initialize();
 
-            #region[Create our Object and Add our Trainer Component]
+            #region[Bootstrap The Main Trainer GameObject]
 
-            var go = new GameObject(
-                "Trainer",
-                new Il2CppSystem.Type[]
-                {
-                    Il2CppType.Of<TrainerComponent>(),
-                    Il2CppType.Of<Trainer.UI.TooltipGUI>()
-                }
-            ); 
-            Object.DontDestroyOnLoad(go);
+            #region[DevNote]
+            // If you create your main object here, only Awake(), OnEnabled() get fired. But if you try to create the trainer in either of 
+            // those it doesn't get created properly as the object get's destroyed right away. Bootstrapping the GameObject like this allows
+            // for it to inherit Unity MonoBehavior Events like OnGUI(), Update(), etc without a Harmony Patch. The only patch needed 
+            // is for the Bootstrapper. You'll see. The Trainer has an EventTest function, Press 'Tab', and watch the BepInEx Console.
+            #endregion
+            Bootstrapper.Create("BootStrapperGO");
 
             #endregion
 
-        }
+        }        
     }
 }

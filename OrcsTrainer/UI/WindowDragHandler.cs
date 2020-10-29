@@ -26,13 +26,15 @@ namespace Trainer.UI
 
         public void Awake()
 		{
-            //BepInExLoader.log.LogMessage("WindowsDragHandler Awake()");
+            BepInExLoader.log.LogMessage("      WindowsDragHandler Awake()");
             rectTransform = gameObject.GetComponent<RectTransform>();
 		}
 
         [HarmonyPostfix]
         public static void OnBeginDrag(PointerEventData eventData)
 		{
+            //BepInExLoader.log.LogMessage("WindowsDragHandler OnBeginDrag()");
+
             if (pointerId != NON_EXISTING_TOUCH)
 			{
 				eventData.pointerDrag = null;
@@ -46,6 +48,8 @@ namespace Trainer.UI
         [HarmonyPostfix]
         public static void OnDrag(PointerEventData eventData)
 		{
+            ///BepInExLoader.log.LogMessage("WindowsDragHandler OnDrag()");
+
             // This is odd... On first drag, it doesn't appear to move. The more you drag the panel, the better the dragging works. ???
 
             if (eventData.pointerId != pointerId)
@@ -64,7 +68,9 @@ namespace Trainer.UI
         [HarmonyPostfix]
         public static void OnEndDrag(PointerEventData eventData)
 		{
-			if(eventData.pointerId != pointerId)
+            //BepInExLoader.log.LogMessage("WindowsDragHandler OnEndDrag()");
+
+            if (eventData.pointerId != pointerId)
 				return;
 
 			pointerId = NON_EXISTING_TOUCH;

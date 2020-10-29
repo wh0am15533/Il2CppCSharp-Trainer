@@ -1,12 +1,15 @@
 ﻿
 using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Collections.Generic;
 using Input = BepInEx.IL2CPP.UnityEngine.Input; //For UnityEngine.Input
 using UnhollowerBaseLib;
+using UnhollowerBaseLib.Runtime;
 using UnhollowerRuntimeLib; // UnhollowerRuntimeLib.Il2CppType.Of<>
-using HarmonyLib;
 using UnityEngine; // This has built-in Il2CppType which conflicts with UnhollowerRuntimeLib.Il2CppType (Doesn't contain .Of<>)
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -27,25 +30,27 @@ namespace Trainer
 
         #region[Trainer]
 
+        // Trainer Base
+        public static GameObject obj = null;
         public static TrainerComponent instance;
         private static bool initialized = false;
         private static BepInEx.Logging.ManualLogSource log;
         public static bool optionToggle = false;
         private static string spyText = "";
         private static Il2CppAssetBundle testAssetBundle = null;
+        private static GameObject eventsTester = null;
+        private static TooltipGUI toolTipComp = null;
 
-#if DEBUG
-
+        // UI
         private static GameObject canvas = null;
         private static bool isVisible = false;
         private static GameObject uiPanel = null;
         private static Sprite stompy = null; // Test Sprite from AssetBundle
         private static GameObject positionDebug = null;
 
-        private static GameObject onGUIHookObject = null;
-        private static I2.Loc.RealTimeTranslation onGUIHookComp  = null;
-
-#endif
+        // Debugging
+        private static bool onGuiFired = false;
+        private static bool updateFired = false;
 
         #endregion
 
@@ -63,19 +68,34 @@ namespace Trainer
 
         #endregion
 
+        internal static GameObject Create(string name)
+        {
+            obj = new GameObject(name);
+            DontDestroyOnLoad(obj);
+
+            var component = new TrainerComponent(obj.AddComponent(UnhollowerRuntimeLib.Il2CppType.Of<TrainerComponent>()).Pointer);
+
+            toolTipComp = new TooltipGUI(obj.AddComponent(UnhollowerRuntimeLib.Il2CppType.Of<TooltipGUI>()).Pointer);
+            toolTipComp.enabled = false;
+
+            return obj;
+        }
+
         public TrainerComponent(IntPtr ptr) : base(ptr)
         {
             log = BepInExLoader.log;
-            log.LogMessage("Entered TrainerComponent Constructor");
+            //log.LogMessage("TrainerComponent Loaded");
 
             instance = this;
         }
 
         private static void Initialize()
         {
-            // AssetBundle Loading
+            #region[AssetBundle Loading]
+
             if (testAssetBundle == null)
             {
+                log.LogMessage(" ");
                 log.LogMessage("Trying to Load AssetBundle...");
                 testAssetBundle = Il2CppAssetBundleManager.LoadFromFile(AppDomain.CurrentDomain.BaseDirectory + "\\AssetBundles\\testassetbundle");
                 if (testAssetBundle == null) { log.LogMessage("AssetBundle Failed to Load!"); return; }
@@ -121,12 +141,15 @@ namespace Trainer
                 */
                 #endregion
 
+                log.LogMessage("Complete!");
             }
 
-            // Create our UI
+            #endregion
+
+            // Create a UI
             instance.CreateUI();
 
-            #region[Display Trainer HotKeys]
+            #region[Display HotKeys]
 
             log.LogMessage(" ");
             log.LogMessage("HotKeys:");
@@ -138,41 +161,28 @@ namespace Trainer
             log.LogMessage("   U = Test Creating UI Elements");
             log.LogMessage("   X = Dump Objects to XML (w/ optionToggle uses FindObjectsOfType<>() (Finds more, but loss of Hierarchy)");
             log.LogMessage("   T = Toggle Tooltip w/ optionToggle");
+            log.LogMessage("   Tab = Test Unity MonoBehavior Events");
             log.LogMessage(" ");
 
-            #endregion
-
-            #region[Example of how we kickstart OnGUI() when gme never loads it.]
-
-            #region[DevNote]
-            // In this game this is a bitch, since it has it's own GUI elements that you can't get rid of.
-            // Tried redirecting the method and I2.Loc.RealTimeTranslation started complaining since it's 
-            // Constanting looking for a value. So this is just an example of Kickstarting OnGUI when doesnt load it.
-            #endregion
-            log.LogMessage("Kickstarting OnGUI...");
-            onGUIHookObject = new GameObject("OnGUIHookObject");
-            onGUIHookComp = onGUIHookObject.AddComponent<I2.Loc.RealTimeTranslation>();
-            onGUIHookComp.enabled = false;
-            Object.DontDestroyOnLoad(onGUIHookObject);
-            
             #endregion
 
             initialized = true;
         }
 
-        public static void Awake()
+        public void Awake()
         {
-            log.LogMessage("Entered TrainerComponent Awake()");
+            log.LogMessage("TrainerComponent Awake() Fired!");
         }
 
-        public static void Start()
+        public void Start()
         {
-            log.LogMessage("Entered TrainerComponent Start()");
+            log.LogMessage("TrainerComponent Start() Fired!");
         }
 
-        [HarmonyPostfix]
-        public static void Update()
+        public void Update()
         {
+            if (!updateFired) { BepInExLoader.log.LogMessage("TrainerComponent Update() Fired!"); updateFired = true; }
+
             if (!initialized) { Initialize(); }
 
             // Note: You can use the regular Input also for Key events, see the usings
@@ -187,14 +197,11 @@ namespace Trainer
             // Toggle TooltipGUI
             if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.T) && optionToggle && EventSystem.current != null && Event.current.type == EventType.KeyDown)
             {
-                onGUIHookComp.enabled = !onGUIHookComp.enabled;
-
                 Event.current.Use();
-
-                //if (onGUIHookComp.enabled) { BepInExLoader.t.Invoke(); } //Invalid IL code error because of Unhollower
+                toolTipComp.enabled = !toolTipComp.enabled;
             }
 
-            // Object Spy - Requires an EventSystem! (Toggle F5 first then Shift+Delete to test. WIP, currently only detects UI elements)
+            // Object Spy - Requires an EventSystem! (WIP, currently only detects UI elements)
             if (optionToggle && EventSystem.current != null && Event.current.type == EventType.mouseDrag)
             {
                 //log.LogMessage("ObjectSpy Fired!");
@@ -376,6 +383,15 @@ namespace Trainer
                 Event.current.Use();
             }
 
+            // Unity MonoBehavior Event Testing
+            if (UnityEngine.Input.GetKeyDown(KeyCode.Tab) && EventSystem.current != null && Event.current.type == EventType.KeyDown)
+            {
+                Event.current.Use();
+                log.LogMessage("Testing Unity MonoBehavior Events...");
+                eventsTester = Trainer.Tools.EventTestComponent.Create("EventTestComponentGO");
+            }
+            if (Trainer.Tools.EventTestComponent.eventsFired) { Destroy(eventsTester); }
+
 
 
 
@@ -462,7 +478,12 @@ namespace Trainer
 
         public void OnGUI()
         {
+            if (!onGuiFired) { BepInExLoader.log.LogMessage("TrainerComponent OnGUI() Fired!"); onGuiFired = true; }
+        }
 
+        public void OnEnable()
+        {
+            BepInExLoader.log.LogMessage("TrainerComponent OnEnable() Fired!");
         }
 
         #region[UI Helpers]
@@ -482,8 +503,8 @@ namespace Trainer
                 uiPanel = instance.createUIPanel(canvas, "550", "200", null);
 
                 // This is how we'll hook mouse Events for window dragging
-                uiPanel.AddComponent<EventTrigger>();
-                uiPanel.AddComponent<WindowDragHandler>();
+                EventTrigger comp1 = new EventTrigger(uiPanel.AddComponent(UnhollowerRuntimeLib.Il2CppType.Of<EventTrigger>()).Pointer);
+                WindowDragHandler comp2 = new WindowDragHandler(uiPanel.AddComponent(UnhollowerRuntimeLib.Il2CppType.Of<WindowDragHandler>()).Pointer);
 
                 Image panelImage = uiPanel.GetComponent<Image>();
                 panelImage.color = instance.HTMLString2Color("#2D2D30FF").Unbox<Color32>();
@@ -583,7 +604,7 @@ namespace Trainer
                 #region[Add a RawImage]
 
                 // Our Test Sprite for UI RawImage Element
-                log.LogMessage("      Trying to Load Test Sprite...");
+                log.LogMessage("   Trying to Load Test Sprite...");
                 stompy = testAssetBundle.LoadAsset<Sprite>("assets/tools/customassets/test assets/externaltexture.png");
                 if (stompy != null) { log.LogMessage("      Sprite Loaded!"); } else { log.LogMessage("      Failed to Load Sprite!"); }
 
@@ -659,16 +680,19 @@ namespace Trainer
 
             // Create a new Canvas Object with required components
             GameObject CanvasGO = new GameObject("CanvasGO");
-            Canvas canvas = CanvasGO.AddComponent<Canvas>();
             Object.DontDestroyOnLoad(CanvasGO);
+
+            Canvas canvas = new Canvas(CanvasGO.AddComponent(UnhollowerRuntimeLib.Il2CppType.Of<Canvas>()).Pointer);
+
             canvas.renderMode = RenderMode.ScreenSpaceCamera;
 
-            UnityEngine.UI.CanvasScaler cs = CanvasGO.AddComponent<UnityEngine.UI.CanvasScaler>();
+            UnityEngine.UI.CanvasScaler cs = new UnityEngine.UI.CanvasScaler(CanvasGO.AddComponent(UnhollowerRuntimeLib.Il2CppType.Of<UnityEngine.UI.CanvasScaler>()).Pointer);
+
             cs.screenMatchMode = UnityEngine.UI.CanvasScaler.ScreenMatchMode.Expand;
             cs.referencePixelsPerUnit = 100f;
             cs.referenceResolution = new Vector2(1024f, 788f);
 
-            UnityEngine.UI.GraphicRaycaster gr = CanvasGO.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+            UnityEngine.UI.GraphicRaycaster gr = new UnityEngine.UI.GraphicRaycaster(CanvasGO.AddComponent(UnhollowerRuntimeLib.Il2CppType.Of<UnityEngine.UI.GraphicRaycaster>()).Pointer);
 
             return CanvasGO;
         }
@@ -884,7 +908,7 @@ namespace Trainer
 
             var allObjectsList = new Il2CppSystem.Collections.Generic.List<GameObject>();
             foreach (var scene in array)
-            {
+            {               
                 var list = new Il2CppSystem.Collections.Generic.List<GameObject>(scene.rootCount);
                 GetRootGameObjects_Internal(scene, list.Pointer);
                 foreach (var obj in list) { allObjectsList.Add(obj); }

@@ -106,14 +106,6 @@
       <HintPath>..\packages\Mono.Cecil.0.11.2\lib\net40\Mono.Cecil.Rocks.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="MonoMod.RuntimeDetour">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\core\MonoMod.RuntimeDetour.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="MonoMod.Utils">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\core\MonoMod.Utils.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Sirenix.Serialization">
       <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\Sirenix.Serialization.dll</HintPath>
       <Private>False</Private>
@@ -166,6 +158,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BepInExLoader.cs" />
+    <Compile Include="Bootstrapper.cs" />
     <Compile Include="GameObjectDetails.cs" />
     <Compile Include="Helpers\BundleManager.cs" />
     <Compile Include="Helpers\ICallHelper.cs" />
@@ -173,6 +166,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\SceneDumper.cs" />
     <None Include="UI\TooltipUI.cs" />
+    <Compile Include="Tools\EventTestComponent.cs" />
     <Compile Include="UI\TooltipGUI.cs" />
     <Compile Include="TrainerComponent.cs" />
     <Compile Include="UI\UIControls.cs" />
