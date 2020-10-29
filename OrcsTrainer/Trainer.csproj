@@ -159,13 +159,12 @@
   <ItemGroup>
     <Compile Include="BepInExLoader.cs" />
     <Compile Include="Bootstrapper.cs" />
-    <Compile Include="GameObjectDetails.cs" />
+    <Compile Include="Helpers\GameObjectDetails.cs" />
     <Compile Include="Helpers\BundleManager.cs" />
     <Compile Include="Helpers\ICallHelper.cs" />
     <Compile Include="Helpers\Il2CppTypeSupport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\SceneDumper.cs" />
-    <None Include="UI\TooltipUI.cs" />
     <Compile Include="Tools\EventTestComponent.cs" />
     <Compile Include="UI\TooltipGUI.cs" />
     <Compile Include="TrainerComponent.cs" />

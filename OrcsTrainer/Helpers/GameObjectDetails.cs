@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -8,6 +9,8 @@ namespace Trainer
     [Serializable]
     public class GameObjectDetails
     {
+        #region[Declarations]
+
         public string name = "";
         public string parent = "";
         public bool enabled = false;
@@ -16,6 +19,8 @@ namespace Trainer
         public string localPosition = "";
         public List<string> components = new List<string>();
         public List<GameObjectDetails> children = new List<GameObjectDetails>();
+
+        #endregion
 
         public GameObjectDetails() { }
 
@@ -97,6 +102,5 @@ namespace Trainer
 
             return xml;
         }
-
     }
 }

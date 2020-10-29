@@ -18,6 +18,45 @@ namespace Trainer.UI
 
     public class UIControls : MonoBehaviour
     {
+        #region[Declarations]
+
+        private const float kWidth = 160f;
+
+        private const float kThickHeight = 30f;
+
+        private const float kThinHeight = 20f;
+
+        private static Vector2 s_ThickElementSize = new Vector2(160f, 30f);
+
+        private static Vector2 s_ThinElementSize = new Vector2(160f, 20f);
+
+        private static Vector2 s_ImageElementSize = new Vector2(100f, 100f);
+
+        private static Color s_DefaultSelectableColor = new Color(1f, 1f, 1f, 1f);
+
+        private static Color s_PanelColor = new Color(1f, 1f, 1f, 0.392f);
+
+        private static Color s_TextColor = new Color(0.19607843f, 0.19607843f, 0.19607843f, 1f);
+
+        public struct Resources
+        {
+            public Sprite standard;
+
+            public Sprite background;
+
+            public Sprite inputField;
+
+            public Sprite knob;
+
+            public Sprite checkmark;
+
+            public Sprite dropdown;
+
+            public Sprite mask;
+        }
+
+        #endregion
+
         public UIControls(IntPtr ptr) : base(ptr) { }
 
         #region[Elements]
@@ -488,41 +527,6 @@ namespace Trainer.UI
             image2.sprite = resources.mask;
             image2.type = Image.Type.Sliced;
             return gameObject;
-        }
-
-        private const float kWidth = 160f;
-
-        private const float kThickHeight = 30f;
-
-        private const float kThinHeight = 20f;
-
-        private static Vector2 s_ThickElementSize = new Vector2(160f, 30f);
-
-        private static Vector2 s_ThinElementSize = new Vector2(160f, 20f);
-
-        private static Vector2 s_ImageElementSize = new Vector2(100f, 100f);
-
-        private static Color s_DefaultSelectableColor = new Color(1f, 1f, 1f, 1f);
-
-        private static Color s_PanelColor = new Color(1f, 1f, 1f, 0.392f);
-
-        private static Color s_TextColor = new Color(0.19607843f, 0.19607843f, 0.19607843f, 1f);
-
-        public struct Resources
-        {
-            public Sprite standard;
-
-            public Sprite background;
-
-            public Sprite inputField;
-
-            public Sprite knob;
-
-            public Sprite checkmark;
-
-            public Sprite dropdown;
-
-            public Sprite mask;
         }
 
         #endregion

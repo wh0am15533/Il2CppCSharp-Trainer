@@ -37,7 +37,6 @@ namespace Trainer
         private static BepInEx.Logging.ManualLogSource log;
         public static bool optionToggle = false;
         private static string spyText = "";
-        private static Il2CppAssetBundle testAssetBundle = null;
         private static GameObject eventsTester = null;
         private static TooltipGUI toolTipComp = null;
         private static IntPtr renderUIPointer = IntPtr.Zero;
@@ -47,6 +46,7 @@ namespace Trainer
         private static bool MainWindowVisible = true;
 
         // UI
+        private static Il2CppAssetBundle testAssetBundle = null;
         private static GameObject canvas = null;
         private static bool isVisible = false;
         private static GameObject uiPanel = null;
@@ -107,58 +107,69 @@ namespace Trainer
 
             if (testAssetBundle == null)
             {
-                log.LogMessage(" ");
-                log.LogMessage("Trying to Load AssetBundle...");
-                testAssetBundle = Il2CppAssetBundleManager.LoadFromFile(AppDomain.CurrentDomain.BaseDirectory + "\\AssetBundles\\testassetbundle");
-                if (testAssetBundle == null) { log.LogMessage("AssetBundle Failed to Load!"); return; }
-
-                // Print out asset names/paths
-                log.LogMessage("Assets:");
-                foreach (var asset in testAssetBundle.AllAssetNames())
+                if (File.Exists(AppDomain.CurrentDomain.BaseDirectory + "\\AssetBundles\\testassetbundle"))
                 {
-                    log.LogMessage("   Asset Name: " + asset.ToString());
-                }
+                    log.LogMessage(" ");
+                    log.LogMessage("Trying to Load AssetBundle...");
+                    testAssetBundle = Il2CppAssetBundleManager.LoadFromFile(AppDomain.CurrentDomain.BaseDirectory + "\\AssetBundles\\testassetbundle");
+                    if (testAssetBundle == null) { log.LogMessage("AssetBundle Failed to Load!"); return; }
 
-                #region[Test Loading a prefab and instantiating it]
-                /*
-                
-                // NOTE: There's currently a error in Unhollower that throws a NullReference exception, but the object and components DO get instantiated
-                // but the prefab doesn't display. It and it's components are running though.
+                    #region[Print out asset names/paths]
 
-                log.LogMessage("Trying to Load Prefab...");
-
-                var prefab = testAssetBundle.LoadAsset<GameObject>("SOME PREFAB ASSET");
-                if (prefab != null)
-                {
-                    log.LogMessage("Asset Loaded!");
-
-                    // Instantiate the object
-                    log.LogMessage("Trying to Instantiate Prefab...");
-                    var t = Instantiate(prefab, new Vector3(0f, 0f), Quaternion.identity);
-                    if (t != null) { log.LogMessage("Prefab Instantiated! Position: " + t.transform.position.ToString()); } else { log.LogMessage("Failed to Instantiated Prefab!"); }
-
-                    #region[Test adding a custom component and make sure it works]
-                    *//*
-                    if (t != null)
+                    log.LogMessage("Assets:");
+                    foreach (var asset in testAssetBundle.AllAssetNames())
                     {
-                        log.LogMessage("Test adding a custom component and make sure it works");                        
-                        var type = UnhollowerRuntimeLib.Il2CppType.Of<WindowDragHandler>();
-                        comp = t.AddComponent(type).Cast<WindowDragHandler>();
-                        log.LogMessage("Component testBool: " + comp.testBool.ToString());
+                        log.LogMessage("   Asset Name: " + asset.ToString());
                     }
-                    *//*
-                    #endregion
-                }
-                else { log.LogMessage("Failed to Load Asset!"); }
-                */
-                #endregion
 
-                log.LogMessage("Complete!");
+                    #endregion
+
+                    #region[Test Loading a prefab and instantiating it]
+                    /*
+                
+                    // NOTE: There's currently a error in Unhollower that throws a NullReference exception, but the object and components DO get instantiated
+                    // but the prefab doesn't display. It and it's components are running though.
+
+                    log.LogMessage("Trying to Load Prefab...");
+
+                    var prefab = testAssetBundle.LoadAsset<GameObject>("SOME PREFAB ASSET");
+                    if (prefab != null)
+                    {
+                        log.LogMessage("Asset Loaded!");
+
+                        // Instantiate the object
+                        log.LogMessage("Trying to Instantiate Prefab...");
+                        var t = Instantiate(prefab, new Vector3(0f, 0f), Quaternion.identity);
+                        if (t != null) { log.LogMessage("Prefab Instantiated! Position: " + t.transform.position.ToString()); } else { log.LogMessage("Failed to Instantiated Prefab!"); }
+
+                        #region[Test adding a custom component and make sure it works]
+                        *//*
+                        if (t != null)
+                        {
+                            log.LogMessage("Test adding a custom component and make sure it works");                        
+                            var type = UnhollowerRuntimeLib.Il2CppType.Of<WindowDragHandler>();
+                            comp = t.AddComponent(type).Cast<WindowDragHandler>();
+                            log.LogMessage("Component testBool: " + comp.testBool.ToString());
+                        }
+                        *//*
+                        #endregion
+                    }
+                    else { log.LogMessage("Failed to Load Asset!"); }
+                    */
+                    #endregion
+
+                    log.LogMessage("Complete!");
+                }
+                else
+                {
+                    log.LogWarning("Skipping AssetBundle Loading - testassetBundle Doesn't Exist at: " + AppDomain.CurrentDomain.BaseDirectory + "\\AssetBundles\\testassetbundle");
+                    log.LogWarning("Make sure the 'AssetBundles' folder from the Git Repo exists in the Game's root folder!");
+                }
             }
 
             #endregion
 
-            // Create a UI
+            // Create a uGUI UI
             instance.CreateUI();
 
             #region[Display HotKeys]
@@ -191,6 +202,11 @@ namespace Trainer
             log.LogMessage("TrainerComponent Start() Fired!");
 
             MainWindow = new Rect(Screen.width / 2 - 100, Screen.height / 2 - 250, 250f, 50f);
+        }
+
+        public void OnEnable()
+        {
+            BepInExLoader.log.LogMessage("TrainerComponent OnEnable() Fired!");
         }
 
         public void Update()
@@ -515,11 +531,6 @@ namespace Trainer
 
         }
 
-        public void OnEnable()
-        {
-            BepInExLoader.log.LogMessage("TrainerComponent OnEnable() Fired!");
-        }
-
         #region[UI Helpers]
 
         private void CreateUI()
@@ -637,14 +648,18 @@ namespace Trainer
 
                 #region[Add a RawImage]
 
-                // Our Test Sprite for UI RawImage Element
-                log.LogMessage("   Trying to Load Test Sprite...");
-                stompy = testAssetBundle.LoadAsset<Sprite>("assets/tools/customassets/test assets/externaltexture.png");
-                if (stompy != null) { log.LogMessage("      Sprite Loaded!"); } else { log.LogMessage("      Failed to Load Sprite!"); }
+                // Our Test Sprite from testBundle for UI RawImage Element
+                if (testAssetBundle != null && stompy != null)
+                {
+                    log.LogMessage("   Trying to Load Test Sprite...");
+                    stompy = testAssetBundle.LoadAsset<Sprite>("assets/tools/customassets/test assets/externaltexture.png");
+                    if (stompy != null) { log.LogMessage("      Sprite Loaded!"); } else { log.LogMessage("      Failed to Load Sprite!"); }
 
-                GameObject uiImage = instance.createUIRawImage(uiPanel, stompy);
-                uiImage.GetComponent<RectTransform>().localPosition = new Vector3(0, -220, 0);
-                uiImage.GetComponent<RectTransform>().localScale = new Vector3(0.3f, 0.3f);
+                    GameObject uiImage = instance.createUIRawImage(uiPanel, stompy);
+                    uiImage.GetComponent<RectTransform>().localPosition = new Vector3(0, -220, 0);
+                    uiImage.GetComponent<RectTransform>().localScale = new Vector3(0.3f, 0.3f);
+                }
+                else { log.LogMessage("   Skipping - Test AssetBundle Not Loaded!"); }
 
                 #endregion
 
