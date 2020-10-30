@@ -36,12 +36,7 @@ namespace Trainer
         public static bool optionToggle = false;
         private static string spyText = "";
         private static GameObject eventsTester = null;
-        private static TooltipGUI toolTipComp = null;
         private static IntPtr renderUIPointer = IntPtr.Zero;
-
-        // IMGUI
-        private static Rect MainWindow;
-        private static bool MainWindowVisible = true;
 
         // UI
         private static Il2CppAssetBundle testAssetBundle = null;
@@ -63,9 +58,6 @@ namespace Trainer
             DontDestroyOnLoad(obj);
 
             var component = new TrainerComponent(obj.AddComponent(UnhollowerRuntimeLib.Il2CppType.Of<TrainerComponent>()).Pointer);
-
-            toolTipComp = new TooltipGUI(obj.AddComponent(UnhollowerRuntimeLib.Il2CppType.Of<TooltipGUI>()).Pointer);
-            toolTipComp.enabled = false;
 
             return obj;
         }
@@ -99,40 +91,6 @@ namespace Trainer
                         log.LogMessage("   Asset Name: " + asset.ToString());
                     }
 
-                    #endregion
-
-                    #region[Test Loading a prefab and instantiating it]
-                    /*
-                
-                    // NOTE: There's currently a error in Unhollower that throws a NullReference exception, but the object and components DO get instantiated
-                    // but the prefab doesn't display. It and it's components are running though.
-
-                    log.LogMessage("Trying to Load Prefab...");
-
-                    var prefab = testAssetBundle.LoadAsset<GameObject>("SOME PREFAB ASSET");
-                    if (prefab != null)
-                    {
-                        log.LogMessage("Asset Loaded!");
-
-                        // Instantiate the object
-                        log.LogMessage("Trying to Instantiate Prefab...");
-                        var t = Instantiate(prefab, new Vector3(0f, 0f), Quaternion.identity);
-                        if (t != null) { log.LogMessage("Prefab Instantiated! Position: " + t.transform.position.ToString()); } else { log.LogMessage("Failed to Instantiated Prefab!"); }
-
-                        #region[Test adding a custom component and make sure it works]
-                        *//*
-                        if (t != null)
-                        {
-                            log.LogMessage("Test adding a custom component and make sure it works");                        
-                            var type = UnhollowerRuntimeLib.Il2CppType.Of<WindowDragHandler>();
-                            comp = t.AddComponent(type).Cast<WindowDragHandler>();
-                            log.LogMessage("Component testBool: " + comp.testBool.ToString());
-                        }
-                        *//*
-                        #endregion
-                    }
-                    else { log.LogMessage("Failed to Load Asset!"); }
-                    */
                     #endregion
 
                     log.LogMessage("Complete!");
@@ -177,9 +135,6 @@ namespace Trainer
         public void Start()
         {
             log.LogMessage("TrainerComponent Start() Fired!");
-
-            // Our IMGUI Main Window - WIP, testing IL2Cpp Stripping
-            MainWindow = new Rect(Screen.width / 2 - 100, Screen.height / 2 - 250, 250f, 50f);
         }
 
         public void OnEnable()
@@ -190,229 +145,11 @@ namespace Trainer
         public void Update()
         {
             if (!updateFired) { BepInExLoader.log.LogMessage("TrainerComponent Update() Fired!"); updateFired = true; }
-
-            if (!initialized) { Initialize(); }
-
-            // Note: You can use the regular Input also for Key events, see the usings
-            // Just an Option Toggle to give us more Key combinations
-            if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.LeftShift) && Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.Delete) && Event.current.type == EventType.KeyDown)
-            {
-                optionToggle = !optionToggle;
-                log.LogMessage("Option Toggle Enabled: " + optionToggle.ToString());
-                Event.current.Use();
-            }
-            
-            // Toggle TooltipGUI
-            if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.T) && optionToggle && EventSystem.current != null && Event.current.type == EventType.KeyDown)
-            {
-                Event.current.Use();
-                toolTipComp.enabled = !toolTipComp.enabled;
-            }
-
-            // Object Spy - Requires an EventSystem! (WIP, currently only detects UI elements)
-            if (optionToggle && EventSystem.current != null && Event.current.type == EventType.mouseDrag)
-            {
-                //log.LogMessage("ObjectSpy Fired!");
-
-                if (canvas != null)
-                {
-                    var saInput = EventSystem.current.GetComponent<StandaloneInputModule>();
-                    var evData = saInput.GetMousePointerEventData();
-
-                    string name = "", pname = "", tmpSpyText = "";
-
-                    try
-                    {
-                        name = evData.GetButtonState(PointerEventData.InputButton.Left).eventData.buttonData.pointerEnter.name.ToString();
-                        pname = evData.GetButtonState(PointerEventData.InputButton.Left).eventData.buttonData.pointerCurrentRaycast.module.name;
-
-                        tmpSpyText = "GameObject: " + name + " - Parent: " + pname;
-
-                        TooltipGUI.Tooltip = name;
-                    }
-                    catch { /* Not Implemented yet for World objects. TODO: Add Physics and Graphics Raycaster */ }
-
-                    if (tmpSpyText != spyText)
-                    {
-                        log.LogMessage(""); // Just a Spacer
-                        log.LogMessage("[GameObject]: " + name + " - Parent: " + pname);
-                        spyText = tmpSpyText;
-
-                        log.LogMessage("  [Parent Components]:");
-                        var pcomps = evData.GetButtonState(PointerEventData.InputButton.Left).eventData.buttonData.pointerCurrentRaycast.module.gameObject.GetGameObjectComponents();
-                        foreach (var comp in pcomps)
-                        {
-                            log.LogMessage("    " + comp.Name);
-                        }
-
-                        log.LogMessage("  [GameObject Components]:");
-                        var gcomps = evData.GetButtonState(PointerEventData.InputButton.Left).eventData.buttonData.pointerEnter.GetGameObjectComponents();
-                        foreach (var comp in gcomps)
-                        {
-                            log.LogMessage("    " + comp.Name);
-                        }
-                    }
-                }
-
-                Event.current.Use();
-            }
-            if (optionToggle && EventSystem.current != null && Event.current.type == EventType.mouseUp)
-            {
-                // Clears the tooltip on MouseUp
-                TooltipGUI.Tooltip = "";
-                Event.current.Use();
-            }
-
-            // Dump All Scenes GameObjects (w/ optionToggle True prints components also)
-            if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.A) && Event.current.type == EventType.KeyDown)
-            {
-                DumpAll(GetAllScenesGameObjects());
-                Event.current.Use();
-            }
-
-            // Dumping Root Scene Objects w/ Values (w/ optionToggle True prints components also)
-            if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.R) && Event.current.type == EventType.KeyDown)
-            {
-                log.LogMessage("Dumping Root Scene Objects w/ values...");
-                Trainer.Tools.SceneDumper.DumpObjects(GetRootSceneGameObjects().ToArray());
-                Event.current.Use();
-            }
-
-            // Create UI if needed otherwise Show/Hide
-            if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.U) && Event.current.type == EventType.KeyDown)
-            {
-                if (canvas == null)
-                {
-                    instance.CreateUI();
-                }
-                else
-                {
-                    if (isVisible)
-                    {
-                        canvas.SetActive(false);
-                        isVisible = false;
-                    }
-                    else
-                    {
-                        canvas.SetActive(true);
-                        isVisible = true;
-                    }
-                }
-
-                Event.current.Use();
-            }
-            
-            // Display Scene Details
-            if (UnityEngine.Input.GetKeyDown(KeyCode.S) && Event.current.type == EventType.KeyDown)
-            {
-                log.LogMessage(" ");
-                log.LogMessage("Scene Details:");
-                Scene activeScene = SceneManager.GetActiveScene();
-                log.LogMessage("   Scene Name: " + activeScene.name);
-                log.LogMessage("   Scene Build Index: " + activeScene.buildIndex.ToString());
-                log.LogMessage("   Root Object Count: " + activeScene.rootCount.ToString());
-
-                log.LogMessage(" ");
-                log.LogMessage("   Camera's:");
-                foreach (var cam in Camera.allCameras)
-                {
-                    log.LogMessage("      Cam: " + cam.name + " GameObject: " + cam.gameObject.name);
-                }
-
-                log.LogMessage(" ");
-                log.LogMessage("   Predefined Layers... (-1 = Not Found)");
-                string[] predefinedLayers = { "Default", "TransparentFX", "Ignore Raycast", "Water", "UI", "Player", String.Empty };
-                foreach (string layer in predefinedLayers)
-                {
-                    log.LogMessage("      Layer: [" + LayerMask.NameToLayer(layer) + "] " + layer);
-                }
-
-                log.LogMessage(" ");
-                log.LogMessage("   Root Objects:");                
-                foreach(var obj in GetRootSceneGameObjects())
-                {
-                    log.LogMessage("      Name: " + obj.name);
-                    log.LogMessage("         Enabled: " + obj.activeSelf.ToString());
-                    log.LogMessage("         Layer: " + obj.layer.ToString());
-                    log.LogMessage("         Position: " + obj.transform.position.ToString());
-                    log.LogMessage("         Local Position: " + obj.transform.localPosition.ToString());
-                    log.LogMessage("         Components: ");
-                    foreach(var comp in obj.GetComponents<Component>())
-                    {
-                        log.LogMessage("            " + comp.name + "(" + comp.GetIl2CppType().Name + ")");
-                    }
-                    log.LogMessage(" ");
-
-                }
-            }
-
-            // Dump All Scene's Objects to XML (w/ optionToggle True uses FindObjectsOfType<GameOBject>() (Finds more, but at loss of Hierarchy))
-            if (UnityEngine.Input.GetKeyDown(KeyCode.X) && Event.current.type == EventType.KeyDown)
-            {
-                log.LogMessage("");
-
-                List<GameObjectDetails> objectTree = new List<GameObjectDetails>();
-
-                // Doesn't show DontDestroyOnLoad objects. GameObject.FindObjectsOfType<GameObject>() does, but loses heirarchy
-                if (!optionToggle)
-                {
-                    log.LogMessage("Dumping All Objects to XML using GetAllScenesGameObject()...");
-                    foreach (var obj in GetAllScenesGameObjects()) { objectTree.Add(new GameObjectDetails(obj)); }
-                }
-                else
-                {
-                    log.LogMessage("Dumping All Objects to XML using GameObject.FindObjectsOfType<GameObject>()...");
-                    foreach (var obj in GameObject.FindObjectsOfType<GameObject>()) { objectTree.Add(new GameObjectDetails(obj)); }
-                }
-
-                File.WriteAllText(AppDomain.CurrentDomain.BaseDirectory + "\\AllObjectsDump.xml", GameObjectDetails.XMLSerialize(objectTree));
-
-                log.LogMessage("Complete!");
-                log.LogMessage("XML written to " + (AppDomain.CurrentDomain.BaseDirectory + "\\AllObjectsDump.xml").Replace("\\\\", "\\"));
-
-                string path = (AppDomain.CurrentDomain.BaseDirectory + "\\AllObjectsDump.xml").Replace("\\\\", "\\");                
-                Application.OpenURL("file:///" + path.Replace("\\", "/")); // Opens in default associated app
-
-                Event.current.Use();
-            }
-
-            // Display Mouse/World/View Positions for Debugging
-            if (positionDebug == null) { positionDebug = GameObject.Find("TitleImage"); } // Just a refence object to compare values
-            if (optionToggle && EventSystem.current != null && Event.current.type == EventType.KeyDown)
-            {
-                log.LogMessage(" ");
-                log.LogMessage("Mouse Debug Info:");
-                log.LogMessage("   TitleImage POS: " + positionDebug.transform.position.ToString());
-                log.LogMessage("   Mouse POS:      " + UnityEngine.Input.mousePosition.ToString());
-                log.LogMessage("   Mouse2World:    " + Camera.current.ScreenToWorldPoint(UnityEngine.Input.mousePosition).ToString());
-                log.LogMessage("   Mouse2Viewport: " + Camera.current.ScreenToViewportPoint(UnityEngine.Input.mousePosition).ToString());
-                log.LogMessage(" ");
-
-                Event.current.Use();
-            }
-
-            // Unity MonoBehavior Event Testing
-            if (UnityEngine.Input.GetKeyDown(KeyCode.Tab) && EventSystem.current != null && Event.current.type == EventType.KeyDown)
-            {
-                Event.current.Use();
-                log.LogMessage("Testing Unity MonoBehavior Events...");
-                eventsTester = Trainer.Tools.EventTestComponent.Create("EventTestComponentGO");
-            }
-            if (Trainer.Tools.EventTestComponent.eventsFired) { Destroy(eventsTester); }
-
         }
 
         public void OnGUI()
         {
             if (!onGuiFired) { BepInExLoader.log.LogMessage("TrainerComponent OnGUI() Fired!"); onGuiFired = true; }
-
-            if (!MainWindowVisible)
-                return;
-
-            if (Event.current.type == EventType.Layout)
-            {
-                // .... your IMGUI code
-            }
         }
 
         #region[UI Helpers]
@@ -864,156 +601,7 @@ namespace Trainer
 
         #endregion
 
-        #region[Dump All Scenes GameObjects]
-
-        private static string dumpLog = "";
-        public static void DumpAll(Il2CppSystem.Collections.Generic.List<GameObject> rootObjects)
-        {
-            log.LogMessage("Dumping Objects...");
-
-            foreach (GameObject obj in rootObjects)
-            {
-                dumpLog = "";
-                level = 1;
-                prevlevel = 0;
-
-                // Dump this object
-                log.LogMessage("[GameObject]: " + obj.name);
-                dumpLog += "[GameObject]: " + obj.name + "\r\n";
-
-                #region[Get GameObject Components if optionToggle]
-                if (optionToggle)
-                {
-                    log.LogMessage("  [Components]:");
-                    dumpLog += "  [Components]:\r\n";
-
-                    var comps = obj.GetGameObjectComponents();
-                    foreach (var comp in comps)
-                    {
-                        log.LogMessage("    " + comp.Name);
-                        dumpLog += "    " + comp.Name + "\r\n";
-                    }
-
-                    dumpLog += "\r\n";
-                }
-                #endregion
-
-                // Dump the children
-                DisplayChildren(obj.transform);
-
-                // Write the Dump File
-                if (dumpLog != "")
-                {
-                    if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "\\OBJECT_DUMPS\\")) { Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + "\\OBJECT_DUMPS\\"); }
-                    File.WriteAllText(AppDomain.CurrentDomain.BaseDirectory + "\\OBJECT_DUMPS\\" + obj.name + "_DUMP.txt", dumpLog);
-                }
-
-                log.LogMessage("Dump Complete!");
-            }
-        }
-
-        private static int level = 0;
-        private static int prevlevel = 0;
-        private static void DisplayChildren(Transform trans)
-        {
-            prevlevel = level;
-
-            foreach (var child in trans)
-            {
-                var t = child.Cast<Transform>();
-
-                // Adjust the indent
-                string consoleprefix = "";
-                for (int cnt = 0; cnt < level; cnt++) { consoleprefix += "  "; }
-
-                // The Actual Logging
-                log.LogMessage(consoleprefix + "[GameObject]: " + t.gameObject.name);
-                dumpLog += consoleprefix + "[GameObject]: " + t.gameObject.name + "\r\n";
-
-                #region[Get GameObject Components if optionToggle]
-                if (optionToggle)
-                {
-                    log.LogMessage(consoleprefix + "  [Components]:");
-                    dumpLog += consoleprefix + "  [Components]:\r\n";
-
-                    var comps = t.gameObject.GetGameObjectComponents();
-                    foreach (var comp in comps)
-                    {
-                        log.LogMessage(consoleprefix + "    " + comp.Name);
-                        dumpLog += consoleprefix + "    " + comp.Name + "\r\n";
-                    }
-
-                    dumpLog += "\r\n";
-                }
-                #endregion
-
-                // Out Inifinate Iterator
-                if (t.childCount > 0)
-                {
-                    level += 1;
-                    DisplayChildren(t);
-                }
-                else { level = prevlevel; }
-
-            }
-        }
-
-        #endregion
     }
-
-    #region[GameObjects Extensions]
-
-    public static class GameObjectExtensions
-    {
-        public static bool HasComponent<T>(this GameObject flag) where T : Component
-        {
-            if (flag == null)
-                return false;
-            return flag.GetComponent<T>() != null;
-        }
-
-        public static List<GameObject> GetParentsChildren(this GameObject parent)
-        {
-            if (parent == null)
-                return null;
-            List<GameObject> tmp = new List<GameObject>();
-
-            for (int idx = 0; idx < parent.transform.childCount; idx++)
-            {
-                tmp.Add(parent.transform.GetChild(idx).gameObject);
-            }
-
-            return tmp;
-        }
-
-        public static List<Il2CppSystem.Type> GetGameObjectComponents(this GameObject gameObject)
-        {
-            if (gameObject == null)
-                return null;
-            List<Il2CppSystem.Type> tmp = new List<Il2CppSystem.Type>();
-
-            var comps = gameObject.GetComponents<Component>();
-            foreach (var comp in comps)
-            {
-                tmp.Add(comp.GetIl2CppType());
-            }
-
-            return tmp;
-        }
-
-        public static void DumpGameObject(this GameObject obj)
-        {
-            if (obj == null)
-                return;
-
-            Il2CppSystem.Collections.Generic.List<GameObject> tmpList = new Il2CppSystem.Collections.Generic.List<GameObject>();
-            tmpList.Add(obj);
-            TrainerComponent.DumpAll(tmpList);
-        }
-
-    }
-
-    #endregion
 }
 
 

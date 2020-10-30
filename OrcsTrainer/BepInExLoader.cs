@@ -28,7 +28,6 @@ namespace Trainer
         public BepInExLoader()
         {
             AppDomain.CurrentDomain.UnhandledException += ExceptionHandler;
-            Application.runInBackground = true;
             log = Log;
         }
 
@@ -49,11 +48,6 @@ namespace Trainer
                 // UI
                 ClassInjector.RegisterTypeInIl2Cpp<UIControls>();
                 ClassInjector.RegisterTypeInIl2Cpp<WindowDragHandler>();
-                ClassInjector.RegisterTypeInIl2Cpp<TooltipGUI>();
-
-                // Debugging
-                ClassInjector.RegisterTypeInIl2Cpp<Trainer.Tools.EventTestComponent>();
-
             }
             catch
             {
