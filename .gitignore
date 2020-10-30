@@ -7,3 +7,6 @@ READ - I use special BepInEx Doorstop version!.txt
 Docs
 OrcsTrainer/obj
 OrcsTrainer/GUILayout.cs
+IL2CppCSharpTrainer/obj
+IL2CppCSharpTrainer/GUILayout.cs
+IL2CppCSharpTrainer/GameObjectDetails.cs
