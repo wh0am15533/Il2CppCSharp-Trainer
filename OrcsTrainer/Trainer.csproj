@@ -90,6 +90,10 @@
       <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\Il2CppSystem.Xml.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="IMGUIModule">
+      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\plugins\IMGUIModule.dll</HintPath>
+      <Aliases>modIMGUI</Aliases>
+    </Reference>
     <Reference Include="Mono.Cecil, Version=0.11.2.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
       <HintPath>..\packages\Mono.Cecil.0.11.2\lib\net40\Mono.Cecil.dll</HintPath>
       <Private>False</Private>
@@ -135,7 +139,8 @@
       <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.IMGUIModule">
+    <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>

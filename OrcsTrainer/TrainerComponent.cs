@@ -1,4 +1,5 @@
-﻿
+﻿extern alias modIMGUI;
+
 using System;
 using System.IO;
 using System.Linq;
@@ -206,7 +207,7 @@ namespace Trainer
 
         public void OnEnable()
         {
-            BepInExLoader.log.LogMessage("TrainerComponent OnEnable() Fired!");
+            log.LogMessage("TrainerComponent OnEnable() Fired!");
         }
 
         public void Update()
@@ -232,7 +233,7 @@ namespace Trainer
             }
 
             // Object Spy - Requires an EventSystem! (WIP, currently only detects UI elements)
-            if (optionToggle && EventSystem.current != null && Event.current.type == EventType.mouseDrag)
+            if (optionToggle && EventSystem.current != null && Event.current.type == EventType.MouseDrag)
             {
                 //log.LogMessage("ObjectSpy Fired!");
 
@@ -278,7 +279,7 @@ namespace Trainer
 
                 Event.current.Use();
             }
-            if (optionToggle && EventSystem.current != null && Event.current.type == EventType.mouseUp)
+            if (optionToggle && EventSystem.current != null && Event.current.type == EventType.MouseUp)
             {
                 // Clears the tooltip on MouseUp
                 TooltipGUI.Tooltip = "";
@@ -510,25 +511,94 @@ namespace Trainer
         {
             if (!onGuiFired) { BepInExLoader.log.LogMessage("TrainerComponent OnGUI() Fired!"); onGuiFired = true; }
 
-            if (!MainWindowVisible)
-                return;
+            //GUI.backgroundColor = Color.black;
+            //GUIStyle titleStyle = new GUIStyle(GUI.skin.window);
+            //titleStyle.normal.textColor = Color.green;
 
-            if (Event.current.type == EventType.Layout)
-            {
-                GUI.backgroundColor = Color.black;
-                GUIStyle titleStyle = new GUIStyle(GUI.skin.window);
-                titleStyle.normal.textColor = Color.green;
+            //MAIN WINDOW - Testing due to Stripping
+            //MainWindow = new Rect(MainWindow.x, MainWindow.y, 250f, 50f);
+            //MainWindow = GUILayout.Window(0, MainWindow, new GUI.WindowFunction(renderUIPointer), "Unity IL2CPP Testing", titleStyle, new GUILayoutOption[0]);
 
-                //MAIN WINDOW - Testing due to Stripping
-                MainWindow = new Rect(MainWindow.x, MainWindow.y, 250f, 50f);
-                //MainWindow = GUILayout.Window(0, MainWindow, new GUI.WindowFunction(renderUIPointer), "Unity IL2CPP Testing", titleStyle, new GUILayoutOption[0]); 
-                
-            }
+            // This works, but you can't move it and no controls, only text and image
+            /*
+            GUI.backgroundColor = Color.black;
+            GUIContent content = new GUIContent("Test");
+            GUIStyle tooltipStyle = new GUIStyle(GUI.skin.box);
+            tooltipStyle.normal.textColor = Color.white;
+            GUI.Box(MainWindow, content, tooltipStyle);
+            */
         }
 
         public static void RenderUI(int id)
         {
+            #region[Styles]
 
+            modIMGUI::IMGUI.GUIStyle labelStyleGreen = new modIMGUI::IMGUI.GUIStyle();
+            labelStyleGreen.normal.textColor = Color.green;
+            labelStyleGreen.alignment = TextAnchor.MiddleCenter;
+
+            modIMGUI::IMGUI.GUIStyle labelStyleWhite = new modIMGUI::IMGUI.GUIStyle();
+            labelStyleWhite.normal.textColor = Color.white;
+            labelStyleWhite.alignment = TextAnchor.MiddleCenter;
+
+            modIMGUI::IMGUI.GUIStyle labelStyleYellow = new modIMGUI::IMGUI.GUIStyle();
+            labelStyleYellow.normal.textColor = Color.yellow;
+            labelStyleYellow.alignment = TextAnchor.MiddleCenter;
+
+            modIMGUI::IMGUI.GUIStyle labelStyleRed = new modIMGUI::IMGUI.GUIStyle();
+            labelStyleRed.normal.textColor = Color.red;
+            labelStyleRed.alignment = TextAnchor.MiddleCenter;
+
+            #endregion
+
+            switch (id)
+            {
+                #region[Main Window]
+
+                case 0:
+                    #region[Windows Header]
+                    modIMGUI::IMGUI.GUILayout.Label("Test Label", labelStyleGreen, new modIMGUI::IMGUI.GUILayoutOption[0]);
+                    modIMGUI::IMGUI.GUILayout.Space(10f);
+                    #endregion
+
+                    bool check = true;
+                    if (check)
+                    {
+                        #region[Cheat Buttons]
+
+                        GUI.color = Color.white;
+                        if (modIMGUI::IMGUI.GUILayout.Button("IMGUI Test", new modIMGUI::IMGUI.GUILayoutOption[0]))
+                        {
+                            Debug.Log("Button Clicked");
+                        }
+
+                        modIMGUI::IMGUI.GUILayout.Space(5f);
+                        modIMGUI::IMGUI.GUILayout.Label("Original wh0am15533 release!", labelStyleGreen);
+
+                        #endregion
+
+                    }
+                    #region[else - Wait For Game Load]    
+                    else
+                    {
+                        modIMGUI::IMGUI.GUILayout.Label("Please wait until game is loaded...", labelStyleYellow);
+
+                        modIMGUI::IMGUI.GUILayout.Space(10f);
+                        modIMGUI::IMGUI.GUILayout.Label("Original wh0am15533 release!", labelStyleGreen);
+                    }
+                    #endregion
+
+                    break;
+
+                #endregion
+
+                #region[Default - Nothing]
+                default:
+                    break;
+                    #endregion
+            }
+
+            modIMGUI::IMGUI.GUI.DragWindow();
         }
 
         #region[UI Helpers]
@@ -710,7 +780,9 @@ namespace Trainer
                 FileData = File.ReadAllBytes(FilePath);
                 Tex2D = new Texture2D(265, 198);
                 //Tex2D.LoadRawTextureData(FileData); // This is Broke. Unhollower/Texture2D doesn't like it...
+                Tex2D.LoadImage(FileData, false);
                 Tex2D.Apply();
+                return Tex2D;
             }
             return null;
         }
@@ -856,7 +928,6 @@ namespace Trainer
             UIControls.Resources uiResources = new UIControls.Resources();
 
             uiResources.background = BgSprite;
-
             log.LogMessage("   Creating UI Image");
             GameObject uiImage = UIControls.CreateImage(uiResources);
             uiImage.transform.SetParent(parent.transform, false);

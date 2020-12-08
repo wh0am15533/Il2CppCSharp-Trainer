@@ -162,6 +162,7 @@ namespace Trainer.UI
             GameObject gameObject = UIControls.CreateUIElementRoot("Image", UIControls.s_ImageElementSize);
             Image image = gameObject.AddComponent<Image>();
             image.sprite = resources.background;
+
             return gameObject;
         }
 

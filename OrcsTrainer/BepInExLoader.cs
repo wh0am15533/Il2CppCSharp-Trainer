@@ -53,7 +53,6 @@ namespace Trainer
 
                 // Debugging
                 ClassInjector.RegisterTypeInIl2Cpp<Trainer.Tools.EventTestComponent>();
-
             }
             catch
             {
