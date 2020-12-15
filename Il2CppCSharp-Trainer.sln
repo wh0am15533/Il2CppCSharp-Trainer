@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.1259
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Trainer", "OrcsTrainer\Trainer.csproj", "{E052991D-E520-4FC8-A373-BA9EAEC96B7D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Trainer", "Il2CppCSharp-Trainer\Trainer.csproj", "{E052991D-E520-4FC8-A373-BA9EAEC96B7D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
