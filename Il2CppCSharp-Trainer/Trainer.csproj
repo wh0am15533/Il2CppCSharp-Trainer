@@ -59,40 +59,36 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\core\0Harmony.dll</HintPath>
+      <HintPath>C:\Games\0-SMALL GAMES\Orcs Civil War\BepInEx\core\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\Assembly-CSharp.dll</HintPath>
+      <HintPath>C:\Games\0-SMALL GAMES\Orcs Civil War\BepInEx\unhollowed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="BepInEx.Core">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\core\BepInEx.Core.dll</HintPath>
+      <HintPath>C:\Games\0-SMALL GAMES\Orcs Civil War\BepInEx\core\BepInEx.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="BepInEx.IL2CPP">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\core\BepInEx.IL2CPP.dll</HintPath>
+      <HintPath>C:\Games\0-SMALL GAMES\Orcs Civil War\BepInEx\core\BepInEx.IL2CPP.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Il2Cppmscorlib">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\Il2Cppmscorlib.dll</HintPath>
+      <HintPath>C:\Games\0-SMALL GAMES\Orcs Civil War\BepInEx\unhollowed\Il2Cppmscorlib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Il2CppSystem">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\Il2CppSystem.dll</HintPath>
+      <HintPath>C:\Games\0-SMALL GAMES\Orcs Civil War\BepInEx\unhollowed\Il2CppSystem.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Il2CppSystem.Core">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\Il2CppSystem.Core.dll</HintPath>
+      <HintPath>C:\Games\0-SMALL GAMES\Orcs Civil War\BepInEx\unhollowed\Il2CppSystem.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Il2CppSystem.Xml">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\Il2CppSystem.Xml.dll</HintPath>
+      <HintPath>C:\Games\0-SMALL GAMES\Orcs Civil War\BepInEx\unhollowed\Il2CppSystem.Xml.dll</HintPath>
       <Private>False</Private>
-    </Reference>
-    <Reference Include="IMGUIModule">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\plugins\IMGUIModule.dll</HintPath>
-      <Aliases>modIMGUI</Aliases>
     </Reference>
     <Reference Include="Mono.Cecil, Version=0.11.2.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
       <HintPath>..\packages\Mono.Cecil.0.11.2\lib\net40\Mono.Cecil.dll</HintPath>
@@ -111,7 +107,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Sirenix.Serialization">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\Sirenix.Serialization.dll</HintPath>
+      <HintPath>C:\Games\0-SMALL GAMES\Orcs Civil War\BepInEx\unhollowed\Sirenix.Serialization.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -120,44 +116,44 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="UnhollowerBaseLib">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\UnhollowerBaseLib.dll</HintPath>
+      <HintPath>C:\Games\0-SMALL GAMES\Orcs Civil War\BepInEx\unhollowed\UnhollowerBaseLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnhollowerRuntimeLib">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\UnhollowerRuntimeLib.dll</HintPath>
+      <HintPath>C:\Games\0-SMALL GAMES\Orcs Civil War\BepInEx\unhollowed\UnhollowerRuntimeLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\UnityEngine.dll</HintPath>
+      <HintPath>C:\Games\0-SMALL GAMES\Orcs Civil War\BepInEx\unhollowed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath>C:\Games\0-SMALL GAMES\Orcs Civil War\BepInEx\unhollowed\UnityEngine.AssetBundleModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>C:\Games\0-SMALL GAMES\Orcs Civil War\BepInEx\unhollowed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>C:\Games\0-SMALL GAMES\Orcs Civil War\BepInEx\unhollowed\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>C:\Games\0-SMALL GAMES\Orcs Civil War\BepInEx\unhollowed\UnityEngine.InputLegacyModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>C:\Games\0-SMALL GAMES\Orcs Civil War\BepInEx\unhollowed\UnityEngine.TextRenderingModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\UnityEngine.UI.dll</HintPath>
+      <HintPath>C:\Games\0-SMALL GAMES\Orcs Civil War\BepInEx\unhollowed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UIModule">
-      <HintPath>..\..\..\..\..\..\..\Games\Orcs Civil War\BepInEx\unhollowed\UnityEngine.UIModule.dll</HintPath>
+      <HintPath>C:\Games\0-SMALL GAMES\Orcs Civil War\BepInEx\unhollowed\UnityEngine.UIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

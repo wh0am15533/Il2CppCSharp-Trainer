@@ -1,5 +1,4 @@
-﻿extern alias modIMGUI;
-
+﻿
 using System;
 using System.IO;
 using System.Linq;
@@ -42,10 +41,6 @@ namespace Trainer
         private static TooltipGUI toolTipComp = null;
         private static IntPtr renderUIPointer = IntPtr.Zero;
 
-        // IMGUI
-        private static Rect MainWindow;
-        private static bool MainWindowVisible = true;
-
         // UI
         private static Il2CppAssetBundle testAssetBundle = null;
         private static GameObject canvas = null;
@@ -60,17 +55,7 @@ namespace Trainer
 
         #endregion
 
-        #region[For Orc's]
 
-        private GameObject levelManagerGO;
-        private mico.game.LevelManager levelManager = null;
-
-#if DEBUG
-        // For Orc's Testing
-        //private List<GameObject> _unitButtons = new List<GameObject>();
-        //private UnitButtonManager unitButtonManager = null;
-#endif
-        #endregion
 
         #endregion
 
@@ -97,13 +82,6 @@ namespace Trainer
 
         private static void Initialize()
         {
-            // Get the RenderUI Pointer for use with IMGUI Window
-            if (renderUIPointer == IntPtr.Zero)
-            {
-                MethodInfo renderUIMeth = typeof(TrainerComponent).GetMethod("RenderUI", BindingFlags.Default | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-                if (renderUIMeth != null) { renderUIPointer = renderUIMeth.MethodHandle.GetFunctionPointer(); log.LogMessage("RenderUI Pointer: 0x" + renderUIPointer.ToString("X8")); } else { log.LogError("RenderUI Pointer is NULL!"); }
-            }
-
             #region[AssetBundle Loading - Put the AssetBundles folder in the Game root folder!]
 
             if (testAssetBundle == null)
@@ -201,8 +179,6 @@ namespace Trainer
         public void Start()
         {
             log.LogMessage("TrainerComponent Start() Fired!");
-
-            MainWindow = new Rect(Screen.width / 2 - 100, Screen.height / 2 - 250, 250f, 50f);
         }
 
         public void OnEnable()
@@ -425,180 +401,13 @@ namespace Trainer
 
 
 
-
-            #region[Orc's Cheats]
-
-            if (instance.levelManager == null)
-            {
-                instance.levelManagerGO = GameObject.Find("LevelManager");
-                if (instance.levelManagerGO != null)
-                {
-                    instance.levelManager = instance.levelManagerGO.GetComponent<mico.game.LevelManager>();
-                }
-            }
-            else
-            {
-                // Give Resources
-                if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.F12) && Event.current.type == EventType.KeyDown)
-                {
-                    log.LogMessage("[Trainer]: Adding 5,000 Resources");
-                    instance.levelManager.addResources(5000);
-                    Event.current.Use();
-                }
-
-                // Kill All
-                if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.F11) && Event.current.type == EventType.KeyDown)
-                {
-                    log.LogMessage("[Trainer]: Killing ALL!");
-                    GameObject UnitManagerGO = GameObject.Find("UnitManager");
-
-                    if(UnitManagerGO != null)
-                    {
-                        var comp = UnitManagerGO.GetComponent<UnitManager>();
-                        comp.killAll();
-                    }
-
-                    Event.current.Use();
-                }
-
-                #region[Enable all Unit Types (It enables the objects but they still aren't clickable)]
-                /*
-                if (Input.GetKeyInt(BepInEx.IL2CPP.UnityEngine.KeyCode.F11) && Event.current.type == EventType.KeyDown)
-                {
-                    GameObject unitButtonsGO = GameObject.Find("UnitButton");
-                    if (unitButtonsGO != null)
-                    {
-                        instance.unitButtonManager = unitButtonsGO.GetComponent<UnitButtonManager>();
-
-                        for (int idx = 0; idx < unitButtonsGO.transform.childCount; idx++)
-                        {
-                            var child = unitButtonsGO.transform.GetChild(idx);
-                            instance._unitButtons.Add(child.gameObject);
-                            log.LogMessage("[GameObject]: " + child.name + " IS_ACTIVE: " + child.gameObject.activeSelf.ToString());
-                        }
-                    }
-
-                    Event.current.Use();
-                }
-
-                if (instance.unitButtonManager != null)
-                {
-                    foreach (var unitButton in instance._unitButtons)
-                    {
-                        instance.unitButtonManager.enableClick = true;
-
-                        if (unitButton.name == "Button_Orc_Shaman" || unitButton.name == "Button_Orc_Catapult")
-                        {
-                            var comp = unitButton.GetComponent<UnitButton>();
-
-                            comp.btn.enabled = true;
-                            comp.btn.interactable = true;
-                            comp.igonreCheck = true;
-                            comp.isEnabled = true;
-                            comp.show(0f);
-                            unitButton.SetActive(true);
-                        }
-                    }
-                }
-                */
-                #endregion                
-            }
-
-            #endregion
         }
 
         public void OnGUI()
         {
             if (!onGuiFired) { BepInExLoader.log.LogMessage("TrainerComponent OnGUI() Fired!"); onGuiFired = true; }
 
-            //GUI.backgroundColor = Color.black;
-            //GUIStyle titleStyle = new GUIStyle(GUI.skin.window);
-            //titleStyle.normal.textColor = Color.green;
 
-            //MAIN WINDOW - Testing due to Stripping
-            //MainWindow = new Rect(MainWindow.x, MainWindow.y, 250f, 50f);
-            //MainWindow = GUILayout.Window(0, MainWindow, new GUI.WindowFunction(renderUIPointer), "Unity IL2CPP Testing", titleStyle, new GUILayoutOption[0]);
-
-            // This works, but you can't move it and no controls, only text and image
-            /*
-            GUI.backgroundColor = Color.black;
-            GUIContent content = new GUIContent("Test");
-            GUIStyle tooltipStyle = new GUIStyle(GUI.skin.box);
-            tooltipStyle.normal.textColor = Color.white;
-            GUI.Box(MainWindow, content, tooltipStyle);
-            */
-        }
-
-        public static void RenderUI(int id)
-        {
-            #region[Styles]
-
-            modIMGUI::IMGUI.GUIStyle labelStyleGreen = new modIMGUI::IMGUI.GUIStyle();
-            labelStyleGreen.normal.textColor = Color.green;
-            labelStyleGreen.alignment = TextAnchor.MiddleCenter;
-
-            modIMGUI::IMGUI.GUIStyle labelStyleWhite = new modIMGUI::IMGUI.GUIStyle();
-            labelStyleWhite.normal.textColor = Color.white;
-            labelStyleWhite.alignment = TextAnchor.MiddleCenter;
-
-            modIMGUI::IMGUI.GUIStyle labelStyleYellow = new modIMGUI::IMGUI.GUIStyle();
-            labelStyleYellow.normal.textColor = Color.yellow;
-            labelStyleYellow.alignment = TextAnchor.MiddleCenter;
-
-            modIMGUI::IMGUI.GUIStyle labelStyleRed = new modIMGUI::IMGUI.GUIStyle();
-            labelStyleRed.normal.textColor = Color.red;
-            labelStyleRed.alignment = TextAnchor.MiddleCenter;
-
-            #endregion
-
-            switch (id)
-            {
-                #region[Main Window]
-
-                case 0:
-                    #region[Windows Header]
-                    modIMGUI::IMGUI.GUILayout.Label("Test Label", labelStyleGreen, new modIMGUI::IMGUI.GUILayoutOption[0]);
-                    modIMGUI::IMGUI.GUILayout.Space(10f);
-                    #endregion
-
-                    bool check = true;
-                    if (check)
-                    {
-                        #region[Cheat Buttons]
-
-                        GUI.color = Color.white;
-                        if (modIMGUI::IMGUI.GUILayout.Button("IMGUI Test", new modIMGUI::IMGUI.GUILayoutOption[0]))
-                        {
-                            Debug.Log("Button Clicked");
-                        }
-
-                        modIMGUI::IMGUI.GUILayout.Space(5f);
-                        modIMGUI::IMGUI.GUILayout.Label("Original wh0am15533 release!", labelStyleGreen);
-
-                        #endregion
-
-                    }
-                    #region[else - Wait For Game Load]    
-                    else
-                    {
-                        modIMGUI::IMGUI.GUILayout.Label("Please wait until game is loaded...", labelStyleYellow);
-
-                        modIMGUI::IMGUI.GUILayout.Space(10f);
-                        modIMGUI::IMGUI.GUILayout.Label("Original wh0am15533 release!", labelStyleGreen);
-                    }
-                    #endregion
-
-                    break;
-
-                #endregion
-
-                #region[Default - Nothing]
-                default:
-                    break;
-                    #endregion
-            }
-
-            modIMGUI::IMGUI.GUI.DragWindow();
         }
 
         #region[UI Helpers]
